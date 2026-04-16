@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Fellowship of the Script</title>
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Title -->
+    <header>
+        <h1>The Fellowship of the Script</h1>
+        <p>An Interactive Visualization of LotR Dialogues</p>    
+    </header>
+
+    <!-- Scene or character info box -->
+    <aside class="info-panel" id="infoPanel">
+        <div class="panel-header">
+        <h2 class="panel-title">Scene Info</h2>
+        <div class="panel-btns">
+            <button class="panel-btn" aria-label="Minimize">&#8212;</button>
+            <button class="panel-btn expand-btn" id="expandInfoBtn" aria-label="Expand">&#x26F6;</button>
+        </div>
+        </div>
+            <div class="info-content">
+        </div>
+    </aside>
+
+    <!-- Visualization panel; containing general data visualizations -->
+    <aside class="viz-panel">
+        <div class="viz-header">
+            <h2 class="panel-title">Visualization</h2>
+            <button class="panel-btn" aria-label="Minimize">&#8212;</button>
+        </div>
+            <button class="viz-arrow viz-arrow--left" data-caret="‹"></button>
+            <div class="viz-content">
+        </div>
+        <button class="viz-arrow viz-arrow--right" data-caret="›"></button>
+    </aside>
+
+    <!-- Panel of all of the characters in the fellowship -->
+    <aside class="character-panel">
+        <h2 class="panel-title">The Fellowship of the Ring</h2>
+        <ul class="character-list">
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Frodo</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Sam</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Merry</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Pippin</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Gandalf</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Aragorn</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Legolas</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Gimli</span>
+            </li>
+            <li class="character-card">
+                <div class="character-icon"></div>
+                <span class="character-name">Boromir</span>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Timeline bar at bottom of screen -->
+    <div class="timeline-controls">
+        <button class="play-btn" id="playBtn" aria-label="Play"></button>
+
+        <div class="slider-wrap">
+            <div class="slider-markers">
+                <div class="slider-divider" style="left: 33.3%"></div>
+                <div class="slider-divider" style="left: 66.6%"></div>
+                <span class="movie-label" style="left: 16.65%">The Fellowship of the Ring</span>
+                <span class="movie-label" style="left: 50%">The Two Towers</span>
+                <span class="movie-label" style="left: 83.3%">Return of the King</span>
+            </div>
+            <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="8" step="1" value="0">
+        </div>
+
+        <select class="scene-select" id="sceneSelect">
+            <option value="0">The Shire</option>
+            <option value="1">Bag End — Gandalf's Visit</option>
+            <option value="2">The Road to Bree</option>
+            <option value="3">The Prancing Pony</option>
+            <option value="4">Weathertop</option>
+            <option value="5">Rivendell — The Council of Elrond</option>
+            <option value="6">The Mines of Moria</option>
+            <option value="7">Lothlórien</option>
+            <option value="8">The Breaking of the Fellowship</option>
+        </select>
+
+        <button class="scene-play-btn" id="scenePlayBtn">Play Scene</button>
+
+        <div class="overview-btn">
+            <label for="overview-toggle" class="overview-icon" aria-label="About this project">ℹ</label>
+        </div>
+    </div>
+
+    <!-- Hidden checkbox that drives the popover open/close -->
+    <input type="checkbox" id="overview-toggle" class="overview-checkbox">
+
+    <!-- Overview popover that shares information about the trilogy and how to use -->
+    <aside class="overview-popover" aria-label="Project overview">
+        <h3 class="overview-title">The Lord of the Rings Trilogy</h3>
+        <p class="overview-desc">Peter Jackson's landmark adaptation of J.R.R. Tolkien's beloved novels — an epic quest to destroy the One Ring and save Middle-earth from the Dark Lord Sauron.</p>
+        <dl class="overview-stats">
+            <div class="overview-stat"><dt>Genre</dt><dd>Epic Fantasy · Adventure</dd></div>
+            <div class="overview-stat"><dt>Released</dt><dd>2001 – 2003</dd></div>
+            <div class="overview-stat"><dt>Films</dt><dd>3 (+ Extended Editions)</dd></div>
+            <div class="overview-stat"><dt>Studio</dt><dd>New Line Cinema</dd></div>
+            <div class="overview-stat"><dt>Director</dt><dd>Peter Jackson</dd></div>
+            <div class="overview-stat"><dt>Source</dt><dd>J.R.R. Tolkien (1954 – 55)</dd></div>
+        </dl>
+        <section class="overview-how">
+            <h4 class="overview-how-title">How to Use</h4>
+            <ul class="overview-controls">
+                <li><span class="ctrl-label">▶</span>Animate automatically through all scenes.</li>
+                <li><span class="ctrl-label">Slider</span>Drag the slider to jump to any point in the trilogy.</li>
+                <li><span class="ctrl-label">Scene ▾</span>Use the dropdown to jump directly to a named scene.</li>
+                <li><span class="ctrl-label">Play Scene</span>Watch characters speak through the scene on the map.</li>
+                <li><span class="ctrl-label">Character</span>Click a character on the map or in the right panel to load their profile in the top-left panel.</li>
+                <li><span class="ctrl-label">Click off</span>Click anywhere on the map to return to scene info in the top-left panel.</li>
+                <li><span class="ctrl-label">‹ › Visual.</span>Cycle through data visualizations using the arrows on the bottom-left panel.</li>
+            </ul>
+        </section>
+
+        <dl class="overview-sources">
+            <div class="overview-source">
+                <dt>Transcripts</dt>
+                <dd><a href="https://www.tk421.net/lotr/film/" target="_blank" rel="noopener">tk421.net/lotr/film</a></dd>
+            </div>
+            <div class="overview-source">
+                <dt>Map of Middle-Earth</dt>
+                <dd><a href="https://www.reddit.com/r/lotr/comments/18fy0ga/middleearth_map_on_the_movies_8k_7680_4320/" target="_blank" rel="noopener">Kerem Yurtseven (Reddit)</a></dd>
+            </div>
+        </dl>
+    </aside>
+
+    <!-- Load js Scripts -->
+    <script scr="js/d3.v6.min.js"></script>
+</body>
+</html>
