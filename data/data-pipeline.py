@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests as req
 import csv
+import unicodedata
 import re
 import string
 import nltk
@@ -35,8 +36,21 @@ if main_page:
 films = ['fotr', 'ttt', 'rotk']
 all_dialogues = []
 
-# Text cleaning, normalization, and stemming - we might have to experiment with this later, I feel like this might be too much cleaning
+def normalize_unicode(text):
+    # Replace Unicode ellipsis and dashes with ASCII equivalents
+    text = text.replace('\u2026', '...')  # ellipsis
+    text = text.replace('…', '...')
+    text = text.replace('\u2014', '-')    # em dash
+    text = text.replace('—', '-')
+    text = text.replace('\u2013', '-')    # en dash
+    text = text.replace('–', '-')
+    # Normalize other unicode characters to closest ASCII
+    text = unicodedata.normalize('NFKC', text)
+    return text
+
+# Text cleaning, normalization, and stemming
 def clean_and_stem(text):
+    text = normalize_unicode(text)
     text = text.lower()
     text = text.translate(str.maketrans('', '', string.punctuation))
     text = re.sub(r'\s+', ' ', text).strip()
@@ -124,12 +138,34 @@ for film in films:
         else:
             print(f"Error fetching {url}")
 
-# Write to CSV
+# Preserve location field if it exists in the current CSV
+import os
+existing_locations = {}
+csv_path = os.path.join(os.path.dirname(__file__), 'data.csv')
+if os.path.exists(csv_path):
+    with open(csv_path, 'r', encoding='utf-8', newline='') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Use a tuple of identifying fields as the key
+            key = (row['scene_name'], row['character'], normalize_unicode(row['dialogue']))
+            existing_locations[key] = row.get('location', '')
 
-with open('lotr_dialogues.csv', 'w', newline='', encoding='utf-8') as csvfile:
-    fieldnames = ['scene_name', 'character', 'dialogue', 'dialogue_cleaned']
+# Write to CSV, preserving location if present
+fieldnames = ['scene_name', 'character', 'dialogue', 'dialogue_cleaned', 'location']
+with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
-    writer.writerows(all_dialogues)
+    for entry in all_dialogues:
+        # Normalize dialogue for matching
+        key = (entry['scene_name'], entry['character'], normalize_unicode(entry['dialogue']))
+        location = existing_locations.get(key, '')
+        row = {
+            'scene_name': entry['scene_name'],
+            'character': entry['character'],
+            'dialogue': normalize_unicode(entry['dialogue']),
+            'dialogue_cleaned': entry['dialogue_cleaned'],
+            'location': location
+        }
+        writer.writerow(row)
 
-print(f"Extracted {len(all_dialogues)} dialogue entries and saved to lotr_dialogues.csv")
+print(f"Extracted {len(all_dialogues)} dialogue entries and saved to data.csv (location field preserved)")
