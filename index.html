@@ -87,26 +87,108 @@
         <button class="play-btn" id="playBtn" aria-label="Play"></button>
 
         <div class="slider-wrap">
-            <div class="slider-markers">
-                <div class="slider-divider" style="left: 33.3%"></div>
-                <div class="slider-divider" style="left: 66.6%"></div>
-                <span class="movie-label" style="left: 16.65%">The Fellowship of the Ring</span>
-                <span class="movie-label" style="left: 50%">The Two Towers</span>
-                <span class="movie-label" style="left: 83.3%">Return of the King</span>
-            </div>
-            <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="8" step="1" value="0">
+            <div class="slider-markers" id="sliderMarkers"></div>
+            <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="95" step="1" value="0">
         </div>
 
+        
         <select class="scene-select" id="sceneSelect">
-            <option value="0">The Shire</option>
-            <option value="1">Bag End — Gandalf's Visit</option>
-            <option value="2">The Road to Bree</option>
-            <option value="3">The Prancing Pony</option>
-            <option value="4">Weathertop</option>
-            <option value="5">Rivendell — The Council of Elrond</option>
-            <option value="6">The Mines of Moria</option>
-            <option value="7">Lothlórien</option>
-            <option value="8">The Breaking of the Fellowship</option>
+            <option value="0">Prologue</option>
+            <option value="1">The Shire</option>
+            <option value="2">Very Old Friends</option>
+            <option value="3">A Long-Expected Party</option>
+            <option value="4">Bilbo's Farewell</option>
+            <option value="5">Isildur's Bane is Found</option>
+            <option value="6">The Shadow of the Past</option>
+            <option value="7">The Passing of the Elves</option>
+            <option value="8">Saruman the White</option>
+            <option value="9">A Short Cut to Mushrooms</option>
+            <option value="10">The Prancing Pony</option>
+            <option value="11">A Knife in the Dark</option>
+            <option value="12">Flight to the Ford</option>
+            <option value="13">Rivendell</option>
+            <option value="14">The Strength of Men</option>
+            <option value="15">The Council of Elrond</option>
+            <option value="16">The Departure of the Fellowship</option>
+            <option value="17">The Ring Goes South</option>
+            <option value="18">The Pass of Caradhras</option>
+            <option value="19">The Watcher in the Water</option>
+            <option value="20">A Journey in the Dark</option>
+            <option value="21">Balin's Tomb</option>
+            <option value="22">The Bridge of Khazad-dûm</option>
+            <option value="23">Lothlórien</option>
+            <option value="24">Caras Galadhon</option>
+            <option value="25">The Mirror of Galadriel</option>
+            <option value="26">The Fighting Uruk-hai</option>
+            <option value="27">Farewell to Lórien</option>
+            <option value="28">The Great River</option>
+            <option value="29">The Breaking of the Fellowship</option>
+            <option value="30">The Battle of Amon Hen</option>
+            <option value="31">The Road Goes Ever On</option>
+            <option value="32">Real Elvish Rope</option>
+            <option value="33">The Taming of Sméagol</option>
+            <option value="34">The Uruk-hai</option>
+            <option value="35">Banished from Rohan</option>
+            <option value="36">Meat's Back on the Menu</option>
+            <option value="37">The Riders of Rohan</option>
+            <option value="38">Treebeard</option>
+            <option value="39">The Passage of the Marshes</option>
+            <option value="40">The White Rider</option>
+            <option value="41">The Black Gate is Closed</option>
+            <option value="42">Entdraught</option>
+            <option value="43">The King of the Golden Hall</option>
+            <option value="44">Theodred's Funeral</option>
+            <option value="45">Departure from Edoras</option>
+            <option value="46">Sméagol and Gollum</option>
+            <option value="47">Of Herbs and Stewed Rabbit</option>
+            <option value="48">Journey to Helm's Deep</option>
+            <option value="49">The Wolves of Isengard</option>
+            <option value="50">Isengard Unleashed</option>
+            <option value="51">The Ring Grows Strong</option>
+            <option value="52">The Window on the West</option>
+            <option value="53">The Forbidden Pool</option>
+            <option value="54">Siege Preparations</option>
+            <option value="55">Ent Moot</option>
+            <option value="56">Helm's Deep</option>
+            <option value="57">The Breaching Wall</option>
+            <option value="58">The Road to Isengard</option>
+            <option value="59">Flotsam and Jetsam</option>
+            <option value="60">The Hornburg</option>
+            <option value="61">Samwise the Brave</option>
+            <option value="62">Old Toby</option>
+            <option value="63">Journey to the Cross-roads</option>
+            <option value="64">The Finding of The One Ring</option>
+            <option value="65">The Voice of Saruman</option>
+            <option value="66">A Hobbit Jig</option>
+            <option value="67">A Villain Revealed</option>
+            <option value="68">The Palantír</option>
+            <option value="69">To Minas Tirith</option>
+            <option value="70">Arwen's Choice</option>
+            <option value="71">The Steward of Gondor</option>
+            <option value="72">The Witch-King of Angmar</option>
+            <option value="73">The Beacons of War</option>
+            <option value="74">Retreat from Osgiliath</option>
+            <option value="75">Faramir's Loyalty</option>
+            <option value="76">Missing Lembas</option>
+            <option value="77">The Muster of Rohan</option>
+            <option value="78">Andúril</option>
+            <option value="79">Departure from Dunharrow</option>
+            <option value="80">The Paths of the Dead</option>
+            <option value="81">The Siege of Gondor</option>
+            <option value="82">Shelob's Lair</option>
+            <option value="83">The Choices of Master Samwise</option>
+            <option value="84">Denethor's Madness</option>
+            <option value="85">The Ride of the Rohirrim</option>
+            <option value="86">The Pyre of Denethor</option>
+            <option value="87">The Battle of Pelennor Fields</option>
+            <option value="88">The Oath Fulfilled</option>
+            <option value="89">The Tower of Cirith Ungol</option>
+            <option value="90">The Last Debate</option>
+            <option value="91">The Mouth of Sauron</option>
+            <option value="92">The Black Gate Opens</option>
+            <option value="93">The Cracks of Doom</option>
+            <option value="94">The Return of the King</option>
+            <option value="95">The Grey Havens</option>
         </select>
 
         <button class="scene-play-btn" id="scenePlayBtn">Play Scene</button>
@@ -157,6 +239,7 @@
     </aside>
 
     <!-- Load js Scripts -->
-    <script scr="js/d3.v6.min.js"></script>
+    <script src="js/d3.v6.min.js"></script>
+    <script src="js/scene-slider.js"></script>
 </body>
 </html>
