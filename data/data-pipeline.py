@@ -100,10 +100,12 @@ for film in films:
 
                     # Remove all parenthetical elements from the speaker name (these are stage directions or descriptions)
                     speaker_raw = parts[0]
-                    # Skip if speaker contains any brackets or parentheses (stage directions)
-                    if re.search(r'[\[(]', speaker_raw):
+                    # Skip if speaker contains any brackets (stage directions)
+                    if re.search(r'\[', speaker_raw):
                         continue
+                    # Remove all parenthetical elements (parentheses) from the speaker name
                     speaker = re.sub(r'\s*\([^)]*\)', '', speaker_raw)
+                    # Remove all bracketed elements from the speaker name (but only after skipping lines with brackets)
                     speaker = re.sub(r'\s*\[[^\]]*\]', '', speaker).strip()
 
                     # Remove all bracketed elements from the dialogue
