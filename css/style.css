@@ -41,7 +41,7 @@ html, body {
 }
 
 body {
-    background-image: url('../data/beige-aged-background.jpg');
+    background-image: url('../data/images/beige-aged-background.jpg');
     background-size: cover;
     background-position: center 40%;
     background-repeat: no-repeat;
@@ -734,6 +734,16 @@ body:has(#overview-toggle:checked) .overview-icon {
     background: var(--parchment);
     border: 2px solid rgba(15, 10, 5, 0.8);
     cursor: pointer;
+}
+
+/* --- Character Map Nodes --- */
+
+.char-node {
+    cursor: pointer;
+}
+
+.char-node:hover > circle {
+    stroke: rgba(232,217,181,1);
 }
 
 /* --- Sample Map Marker --- */
