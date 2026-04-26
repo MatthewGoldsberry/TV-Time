@@ -35,6 +35,9 @@ class InfoPanel {
         this.data = _data;
         this.characterStats = _config.characterStats;
         this.sceneStats = _config.sceneStats;
+        this.characterData = _config.characterData;
+        this.corpusWordFreq = _config.corpusWordFreq;
+        this.SCENE_INDEX = _config.SCENE_INDEX;
         this.isExpanded = false;
         this.initVis();
     }
@@ -84,7 +87,6 @@ class InfoPanel {
             ? `<a class="char-wiki-link" href="${wikiUrl}" target="_blank" rel="noopener">View ${name}'s Wiki Page ↗</a>`
             : '';
 
-        // TODO add data
         const fmt = v => (v != null && v !== 0) ? v.toLocaleString() : '—';
 
         this.titleEl.textContent = name;
@@ -129,7 +131,6 @@ class InfoPanel {
         const filmName  = FILM_NAMES[Math.floor(index / 32)] ?? '';
         const imgSrc    = `data/images/scene/${index}.png`;
 
-        // TODO add data 
         const fmt = v => (v != null && v !== 0) ? v.toLocaleString() : '—';
 
         this.titleEl.textContent = 'Scene Info';
@@ -148,7 +149,7 @@ class InfoPanel {
                     </div>
                     <div class="char-stat">
                         <span class="stat-label">Fellowship</span>
-                        <span class="stat-value">— / 9</span>
+                        <span class="stat-value">${stats?.fellowshipCount != null ? `${stats.fellowshipCount} / 9` : '— / 9'}</span>
                     </div>
                 </div>
                 <div class="scene-extended">
