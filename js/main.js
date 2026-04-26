@@ -9,6 +9,7 @@ d3.csv('data/lotr_script_data.csv').then(data => {
     const characterStats = {};
     const characterData = {};
     const corpusWordFreq = {};
+    const corpusNgramFreq = {};
     const sceneStats = {};
 
     data.forEach(d => {
@@ -34,6 +35,18 @@ d3.csv('data/lotr_script_data.csv').then(data => {
         // Corpus-wide word frequency for unique-word scoring
         (d.dialogue_cleaned || '').split(' ').filter(Boolean).forEach(w => {
             corpusWordFreq[w] = (corpusWordFreq[w] || 0) + 1;
+        });
+
+        // Corpus-wide n-gram frequency (2–8 words) for phrase distinctiveness scoring.
+        // Sentence-split and apostrophe-preserving to match CharacterPhrases extraction exactly.
+        (d.dialogue || '').split(/[.!?]+/).forEach(sentence => {
+            const rawWords = sentence.toLowerCase().replace(/[^a-z\s']/g, '').split(/\s+/).filter(Boolean);
+            for (let n = 2; n <= 8; n++) {
+                for (let i = 0; i <= rawWords.length - n; i++) {
+                    const gram = rawWords.slice(i, i + n).join(' ');
+                    corpusNgramFreq[gram] = (corpusNgramFreq[gram] || 0) + 1;
+                }
+            }
         });
 
         // Per-scene aggregation
@@ -65,7 +78,7 @@ d3.csv('data/lotr_script_data.csv').then(data => {
 
     // Initialize the InfoPanel
     infoPanel = new InfoPanel(
-        { characterStats, sceneStats, characterData, corpusWordFreq, SCENE_INDEX },
+        { characterStats, sceneStats, characterData, corpusWordFreq, corpusNgramFreq, SCENE_INDEX },
         data
     );
     infoPanel.showScene(0);
