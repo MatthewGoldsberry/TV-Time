@@ -112,6 +112,10 @@ class InfoPanel {
                     </div>
                 </div>
                 <div class="char-extended">
+                    <div class="extended-section presence-section">
+                        <p class="section-label">Scene Presence <span class="presence-info-icon">&#x2139;</span></p>
+                        <div class="char-presence-chart"></div>
+                    </div>
                     <div class="extended-section">
                         <p class="section-label">Top Scenes</p>
                         <ul class="bar-list"></ul>
@@ -119,6 +123,30 @@ class InfoPanel {
                 </div>
                 ${EXPAND_HINT}
             </div>`;
+
+        // Initialize the CharacterPresence object
+        new CharacterPresence(
+            { parentElement: this.contentEl.querySelector('.char-presence-chart') },
+            this.characterData[name] || [],
+            this.SCENE_INDEX
+        );
+
+        // Wire the info icon to the shared presence tooltip
+        const infoIcon = this.contentEl.querySelector('.presence-info-icon');
+        const tooltip  = document.getElementById('presence-tooltip');
+        if (infoIcon && tooltip) {
+            infoIcon.addEventListener('mouseover', e => {
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top  = (e.pageY + 10) + 'px';
+                tooltip.innerHTML  = '<span class="pt-name">About this chart</span>Reflects spoken dialogue only — not visual screen presence.';
+            });
+            infoIcon.addEventListener('mousemove', e => {
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top  = (e.pageY + 10) + 'px';
+            });
+            infoIcon.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
+        }
     }
 
     /**
