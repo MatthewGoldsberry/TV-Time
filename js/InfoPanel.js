@@ -139,6 +139,7 @@ class InfoPanel {
                                 </select>
                                 <select class="words-select mode-select">
                                     <option value="freq">Most Used</option>
+                                    <option value="rate">Most Frequent</option>
                                     <option value="unique">Most Unique</option>
                                 </select>
                             </div>

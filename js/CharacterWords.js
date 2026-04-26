@@ -71,12 +71,16 @@ class CharacterWords {
             });
         });
 
-        // Score each word by raw frequency or relative uniqueness vs. corpus
+        const totalLines = filtered.length || 1;
+
+        // Score each word by raw frequency, relative uniqueness vs. corpus, or % of lines
         const scored = Object.entries(charFreq).map(([w, f]) => ({
             word:  w,
             score: vis.mode === 'unique'
                 ? (f / ((vis.corpusWordFreq[w] || 0) + 1)) * 100
-                : f,
+                : vis.mode === 'rate'
+                    ? (f / totalLines) * 100
+                    : f,
         }));
 
         // Sort descending, all words; band scale maps index 0 → top of chart
@@ -144,7 +148,7 @@ class CharacterWords {
             .style('font-size', '8px')
             .transition().duration(280)
             .attr('x', d => vis.xScale(d.score) + 5)
-            .text(d => vis.mode === 'unique' ? `${(d.score).toFixed(2)}%` : d.score);
+            .text(d => vis.mode === 'freq' ? d.score : `${d.score.toFixed(1)}%`);
 
         // Y-axis with word labels only
         vis.yAxisG
