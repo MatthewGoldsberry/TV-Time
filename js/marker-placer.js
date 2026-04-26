@@ -1,14 +1,4 @@
 // marker-placer.js
-// This script places character markers on the SVG map based on data.csv
-// Assumes D3.js is loaded and an SVG map exists in the DOM
-
-// Usage: Include this script after d3.v6.min.js and after the SVG map is present in the DOM.
-
-// Configuration
-const IMAGES_PATH = 'data/images/';
-
-// Main function to load data and place markers
-
 
 let _markerData = null;
 
@@ -27,7 +17,7 @@ const FELLOWSHIP = [
     'Gandalf', 'Gimli', 'Legolas'
 ];
 
-// Get the starting position for each character (first appearance with a location) in a given scene
+// Get the starting position for each character in a given scene
 function getFellowshipStartPositionsForScene(sceneName) {
     if (!_markerData || !sceneName) return [];
     const seen = new Set();
@@ -58,7 +48,6 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
 
     // Flatten with offset
     const offsetMarkers = [];
-    const RADIUS = 24;
     Object.values(grouped).forEach(group => {
         if (group.length === 1) {
             offsetMarkers.push({ ...group[0], offsetX: 0, offsetY: 0 });
@@ -66,8 +55,8 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
             const angleStep = (2 * Math.PI) / group.length;
             group.forEach((d, i) => {
                 const angle = i * angleStep;
-                const offsetX = Math.round(Math.cos(angle) * RADIUS);
-                const offsetY = Math.round(Math.sin(angle) * RADIUS);
+                const offsetX = Math.round(Math.cos(angle) * 24);
+                const offsetY = Math.round(Math.sin(angle) * 24);
                 offsetMarkers.push({ ...d, offsetX, offsetY });
             });
         }
@@ -84,7 +73,7 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
         .attr('height', 32)
         .attr("xlink:href", d => {
             const imgName = (d.character === 'Strider') ? 'Aragorn' : d.character;
-            return `${'data/images/'}${imgName}.png`;
+            return `${'data/images/'}${imgName}-modified.png`;
         })
         .attr('data-character', d => d.character)
         .append('title')
