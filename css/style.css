@@ -1079,6 +1079,69 @@ body:has(#overview-toggle:checked) .overview-icon {
 }
 
 
+/* --- CharacterPresence grid --- */
+
+.char-presence-chart {
+    width: 100%;
+    background: rgba(12, 10, 6, 0.75);
+    border: 1px solid rgba(232, 217, 181, 0.18);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    box-sizing: border-box;
+}
+
+.presence-section .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(232, 217, 181, 0.6);
+}
+
+.presence-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.9rem;
+    height: 0.9rem;
+    font-size: 0.6rem;
+    line-height: 1;
+    border: 1px solid rgba(232, 217, 181, 0.3);
+    border-radius: 50%;
+    color: rgba(232, 217, 181, 0.4);
+    cursor: default;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+    letter-spacing: 0;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.presence-info-icon:hover {
+    color: rgba(232, 217, 181, 0.9);
+    border-color: rgba(232, 217, 181, 0.7);
+    background: rgba(232, 217, 181, 0.08);
+}
+
+.presence-tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(12, 10, 6, 0.95);
+    border: 1px solid rgba(232, 217, 181, 0.3);
+    border-radius: 0.4rem;
+    padding: 0.45rem 0.75rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    color: var(--parchment);
+    line-height: 1.6;
+    z-index: 300;
+    backdrop-filter: blur(4px);
+}
+
+.presence-tooltip .pt-name {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.1rem;
+}
+
+
 /* --- Character Map Nodes --- */
 
 .char-node {
