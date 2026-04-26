@@ -147,42 +147,60 @@ class InfoPanel {
                 </div>
                 <div class="char-extended">
                     ${descriptionHTML}
-                    <div class="extended-section presence-section">
-                        <p class="section-label">Scene Presence <span class="presence-info-icon">&#x2139;</span></p>
-                        <div class="char-presence-chart"></div>
+                    <div class="extended-section presence-section is-open">
+                        <div class="section-header">
+                            <span class="section-title">Scene Presence</span>
+                            <span class="presence-info-icon section-info-icon">&#x2139;</span>
+                            <span class="section-caret"></span>
+                        </div>
+                        <div class="section-body">
+                            <div class="char-presence-chart"></div>
+                        </div>
                     </div>
                     <div class="extended-section phrases-section">
-                        <p class="section-label">Top Phrases <span class="presence-info-icon phrases-info-icon">&#x2139;</span></p>
-                        <div class="char-phrases-chart">
-                            <div class="phrases-controls">
-                                <select class="words-select phrases-film-select">
-                                    <option value="all">All Films</option>
-                                    <option value="The Fellowship of the Ring">The Fellowship of the Ring</option>
-                                    <option value="The Two Towers">The Two Towers</option>
-                                    <option value="The Return of the King">The Return of the King</option>
-                                </select>
+                        <div class="section-header">
+                            <span class="section-title">Top Phrases</span>
+                            <span class="presence-info-icon phrases-info-icon section-info-icon">&#x2139;</span>
+                            <span class="section-caret"></span>
+                        </div>
+                        <div class="section-body">
+                            <div class="char-phrases-chart">
+                                <div class="phrases-controls">
+                                    <select class="words-select phrases-film-select">
+                                        <option value="all">All Films</option>
+                                        <option value="The Fellowship of the Ring">The Fellowship of the Ring</option>
+                                        <option value="The Two Towers">The Two Towers</option>
+                                        <option value="The Return of the King">The Return of the King</option>
+                                    </select>
+                                </div>
+                                <div class="phrases-bars"></div>
                             </div>
-                            <div class="phrases-bars"></div>
                         </div>
                     </div>
                     <div class="extended-section words-section">
-                        <p class="section-label">Top Words <span class="presence-info-icon words-info-icon">&#x2139;</span></p>
-                        <div class="char-words-chart">
-                            <div class="words-controls">
-                                <select class="words-select film-select">
-                                    <option value="all">All Films</option>
-                                    <option value="The Fellowship of the Ring">The Fellowship of the Ring</option>
-                                    <option value="The Two Towers">The Two Towers</option>
-                                    <option value="The Return of the King">The Return of the King</option>
-                                </select>
-                                <select class="words-select mode-select">
-                                    <option value="freq">Most Used</option>
-                                    <option value="rate">Most Frequent</option>
-                                    <option value="unique">Most Unique</option>
-                                </select>
-                            </div>
-                            <div class="words-scroll-wrap">
-                                <div class="words-chart-scroll"></div>
+                        <div class="section-header">
+                            <span class="section-title">Top Words</span>
+                            <span class="presence-info-icon words-info-icon section-info-icon">&#x2139;</span>
+                            <span class="section-caret"></span>
+                        </div>
+                        <div class="section-body">
+                            <div class="char-words-chart">
+                                <div class="words-controls">
+                                    <select class="words-select film-select">
+                                        <option value="all">All Films</option>
+                                        <option value="The Fellowship of the Ring">The Fellowship of the Ring</option>
+                                        <option value="The Two Towers">The Two Towers</option>
+                                        <option value="The Return of the King">The Return of the King</option>
+                                    </select>
+                                    <select class="words-select mode-select">
+                                        <option value="freq">Most Used</option>
+                                        <option value="rate">Most Frequent</option>
+                                        <option value="unique">Most Unique</option>
+                                    </select>
+                                </div>
+                                <div class="words-scroll-wrap">
+                                    <div class="words-chart-scroll"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -225,6 +243,20 @@ class InfoPanel {
         });
         this.contentEl.querySelector('.mode-select').addEventListener('change', e => {
             wordsVis.updateVis(undefined, e.target.value);
+        });
+
+        // Wire collapsible section headers (description-section has no header; skip it)
+        this.contentEl.querySelectorAll('.extended-section').forEach(section => {
+            const header = section.querySelector('.section-header');
+            if (!header) return;
+
+            header.addEventListener('click', () => {
+                const opening = !section.classList.contains('is-open');
+                section.classList.toggle('is-open');
+                if (opening && section.classList.contains('words-section') && this.wordsVis) {
+                    requestAnimationFrame(() => this.wordsVis._syncScrollHeight());
+                }
+            });
         });
 
         // Shared tooltip element

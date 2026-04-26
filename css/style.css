@@ -535,11 +535,11 @@ body:has(#overview-toggle:checked) .overview-icon {
 
 .character-description {
     font-family: 'Cinzel', serif;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     letter-spacing: 0.02em;
     color: rgba(232, 217, 181, 0.75);
     line-height: 1.65;
-    margin: 0.4rem 0 0;
+    margin: 0.4rem 0 var(--gap-sm);
     text-align: center;
 }
 
@@ -901,12 +901,13 @@ body:has(#overview-toggle:checked) .overview-icon {
 .info-panel.expanded .char-extended {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-lg);
     grid-column: 2;
     grid-row: 1 / 4;
     border-left: var(--border);
     padding-left: var(--gap-lg);
+    overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     min-height: 0;
     animation: fadeSlideIn 0.25s ease forwards;
 }
@@ -931,17 +932,62 @@ body:has(#overview-toggle:checked) .overview-icon {
 .extended-section {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-xs);
+    border-bottom: 1px solid rgba(232, 217, 181, 0.12);
 }
 
-.section-label {
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    cursor: pointer;
+    padding: var(--gap-sm) 0;
+    user-select: none;
+}
+
+.section-title {
     font-family: 'Cinzel', serif;
-    font-size: 0.58rem;
+    font-size: 0.72rem;
+    font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(232, 217, 181, 0.45);
-    margin: 0 0 var(--gap-xs);
-    font-weight: 400;
+    color: rgba(232, 217, 181, 0.6);
+}
+
+.section-caret {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 2rem;
+    color: rgba(232, 217, 181, 0.4);
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.section-caret::before {
+    content: '›';
+    display: inline-block;
+    transform: rotate(90deg);
+}
+
+.extended-section.is-open .section-caret::before {
+    transform: rotate(-90deg);
+}
+
+.section-header:hover .section-caret {
+    color: rgba(232, 217, 181, 0.75);
+}
+
+.section-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+}
+
+.section-body > * {
+    padding-bottom: var(--gap-sm);
+}
+
+.extended-section.is-open .section-body {
+    max-height: 600px;
 }
 
 
@@ -1101,11 +1147,6 @@ body:has(#overview-toggle:checked) .overview-icon {
     box-sizing: border-box;
 }
 
-.presence-section .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: rgba(232, 217, 181, 0.6);
-}
 
 .presence-info-icon {
     display: inline-flex;
@@ -1162,11 +1203,6 @@ body:has(#overview-toggle:checked) .overview-icon {
 
 /* --- CharacterWords bar chart --- */
 
-.words-section .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: rgba(232, 217, 181, 0.6);
-}
 
 .char-words-chart {
     display: flex;
@@ -1255,6 +1291,7 @@ body:has(#overview-toggle:checked) .overview-icon {
 .character-panel {
     scrollbar-width: thin;
     scrollbar-color: rgba(232, 217, 181, 0.2) transparent;
+    scrollbar-gutter: stable;
 }
 
 .info-content::-webkit-scrollbar,
@@ -1289,11 +1326,6 @@ body:has(#overview-toggle:checked) .overview-icon {
 
 /* --- CharacterPhrases bar chart --- */
 
-.phrases-section .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: rgba(232, 217, 181, 0.6);
-}
 
 .char-phrases-chart {
     width: 100%;
