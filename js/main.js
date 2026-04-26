@@ -5,7 +5,7 @@
 // class elements
 let infoPanel;
 
-d3.csv('data/data.csv').then(data => {
+d3.csv('data/lotr_script_data.csv').then(data => {
     data.forEach(d => {
         if (d.location) {
             const [x, y] = d.location.trim().split(/\s+/);
