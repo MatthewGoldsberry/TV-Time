@@ -71,6 +71,12 @@ class InfoPanel {
         this.backdrop.classList.toggle('visible', expand);
         this.expandBtn.innerHTML = expand ? '&#x2715;' : '&#x26F6;';
         this.expandBtn.setAttribute('aria-label', expand ? 'Collapse' : 'Expand');
+        // Sync words chart height after the panel's CSS transition finishes
+        if (expand && this.wordsVis) {
+            this.panel.addEventListener('transitionend', () => {
+                if (this.wordsVis) this.wordsVis._syncScrollHeight();
+            }, { once: true });
+        }
     }
 
     /**
@@ -116,9 +122,25 @@ class InfoPanel {
                         <p class="section-label">Scene Presence <span class="presence-info-icon">&#x2139;</span></p>
                         <div class="char-presence-chart"></div>
                     </div>
-                    <div class="extended-section">
-                        <p class="section-label">Top Scenes</p>
-                        <ul class="bar-list"></ul>
+                    <div class="extended-section words-section">
+                        <p class="section-label">Top Words <span class="presence-info-icon words-info-icon">&#x2139;</span></p>
+                        <div class="char-words-chart">
+                            <div class="words-controls">
+                                <select class="words-select film-select">
+                                    <option value="all">All Films</option>
+                                    <option value="The Fellowship of the Ring">The Fellowship of the Ring</option>
+                                    <option value="The Two Towers">The Two Towers</option>
+                                    <option value="The Return of the King">The Return of the King</option>
+                                </select>
+                                <select class="words-select mode-select">
+                                    <option value="freq">Most Used</option>
+                                    <option value="unique">Most Unique</option>
+                                </select>
+                            </div>
+                            <div class="words-scroll-wrap">
+                                <div class="words-chart-scroll"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 ${EXPAND_HINT}
@@ -131,9 +153,47 @@ class InfoPanel {
             this.SCENE_INDEX
         );
 
-        // Wire the info icon to the shared presence tooltip
-        const infoIcon = this.contentEl.querySelector('.presence-info-icon');
-        const tooltip  = document.getElementById('presence-tooltip');
+        // Initialize top-words bar chart
+        this.wordsVis = null;
+        const wordsVis = new CharacterWords(
+            { parentElement: this.contentEl.querySelector('.words-chart-scroll') },
+            this.characterData[name] || [],
+            this.corpusWordFreq
+        );
+        this.wordsVis = wordsVis;
+
+        // Wire film and mode dropdowns
+        this.contentEl.querySelector('.film-select').addEventListener('change', e => {
+            wordsVis.updateVis(e.target.value, undefined);
+        });
+        this.contentEl.querySelector('.mode-select').addEventListener('change', e => {
+            wordsVis.updateVis(undefined, e.target.value);
+        });
+
+        // Shared tooltip element
+        const tooltip = document.getElementById('presence-tooltip');
+
+        // Wire the words info icon
+        const wordsIcon = this.contentEl.querySelector('.words-info-icon');
+        if (wordsIcon && tooltip) {
+            wordsIcon.addEventListener('mouseover', e => {
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top  = (e.pageY + 10) + 'px';
+                tooltip.innerHTML  = '<span class="pt-name">About this chart</span>'
+                    + 'Most frequent words from this character\'s dialogue after removing common filler words. '
+                    + '<br><br><strong>Most Unique</strong> re-ranks by how distinctively this character uses each word: '
+                    + 'character count ÷ (cast-wide count + 1). Higher scores mean the word is characteristic of this character specifically.';
+            });
+            wordsIcon.addEventListener('mousemove', e => {
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top  = (e.pageY + 10) + 'px';
+            });
+            wordsIcon.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
+        }
+
+        // Wire the presence info icon
+        const infoIcon = this.contentEl.querySelector('.presence-info-icon:not(.words-info-icon)');
         if (infoIcon && tooltip) {
             infoIcon.addEventListener('mouseover', e => {
                 tooltip.style.display = 'block';
