@@ -71,11 +71,16 @@ class InfoPanel {
         this.backdrop.classList.toggle('visible', expand);
         this.expandBtn.innerHTML = expand ? '&#x2715;' : '&#x26F6;';
         this.expandBtn.setAttribute('aria-label', expand ? 'Collapse' : 'Expand');
-        // Sync words chart height after the panel's CSS transition finishes
+        // Sync words chart height once the panel reaches its final expanded width.
         if (expand && this.wordsVis) {
-            this.panel.addEventListener('transitionend', () => {
-                if (this.wordsVis) this.wordsVis._syncScrollHeight();
-            }, { once: true });
+            const sync = () => { if (this.wordsVis) this.wordsVis._syncScrollHeight(); };
+            const onEnd = e => {
+                if (e.propertyName !== 'width') return;
+                this.panel.removeEventListener('transitionend', onEnd);
+                sync();
+            };
+            this.panel.addEventListener('transitionend', onEnd);
+            setTimeout(sync, 400);
         }
     }
 
@@ -161,6 +166,9 @@ class InfoPanel {
             this.corpusWordFreq
         );
         this.wordsVis = wordsVis;
+
+        // If panel already expanded, _syncScrollHeight can measure immediately
+        if (this.isExpanded) requestAnimationFrame(() => wordsVis._syncScrollHeight());
 
         // Wire film and mode dropdowns
         this.contentEl.querySelector('.film-select').addEventListener('change', e => {
