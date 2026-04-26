@@ -1,7 +1,7 @@
 # Movie-Time: The Fellowship of the Script
 
 ![Repo Image](/data/images/repo_image.png)
-<!-- Image Source: Gemini Nano Banana -->
+*Image generated using Google Gemini.*
 
 Text Analysis Visualizations on Movie Series Scripts
 
