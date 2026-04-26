@@ -269,7 +269,7 @@ body:has(#overview-toggle:checked) .overview-icon {
 
 .overview-sources {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: var(--gap-xs) var(--gap-md);
     margin: var(--gap-sm) 0 0;
     padding: var(--gap-sm) 0 0;
@@ -292,11 +292,12 @@ body:has(#overview-toggle:checked) .overview-icon {
 
 .overview-source dd {
     margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    color: var(--parchment);
 }
 
 .overview-source a {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
     color: var(--parchment);
     text-decoration: none;
     transition: color 0.2s;
@@ -371,11 +372,13 @@ body:has(#overview-toggle:checked) .overview-icon {
     height: var(--info-h);
     background: var(--dark-bg);
     backdrop-filter: blur(4px);
+    border: var(--border);
     border-radius: var(--panel-radius);
     padding: var(--gap-sm) var(--gap-md);
     z-index: 90;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .info-content {
@@ -528,40 +531,6 @@ body:has(#overview-toggle:checked) .overview-icon {
     font-size: 28cqh;
     color: var(--parchment);
     letter-spacing: 0.03em;
-}
-
-
-/* --- Map Credit --- */
-
-.map-credit {
-    position: fixed;
-    bottom: var(--panel-offset);
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Cinzel', serif;
-    font-size: 0.62rem;
-    color: #ffffff;
-    letter-spacing: 0.04em;
-    pointer-events: none;
-    z-index: 91;
-    white-space: nowrap;
-    text-shadow:
-         1px  1px 0 #000, -1px -1px 0 #000,
-         1px -1px 0 #000, -1px  1px 0 #000,
-         2px  2px 0 #000, -2px -2px 0 #000,
-         2px -2px 0 #000, -2px  2px 0 #000,
-        0 0 0.5rem rgba(0, 0, 0, 0.9);
-}
-
-.map-credit a {
-    color: var(--parchment);
-    text-decoration: none;
-    pointer-events: auto;
-}
-
-.map-credit a:hover {
-    color: #ffffff;
-    text-decoration: underline;
 }
 
 
@@ -735,6 +704,380 @@ body:has(#overview-toggle:checked) .overview-icon {
     border: 2px solid rgba(15, 10, 5, 0.8);
     cursor: pointer;
 }
+
+/* --- Character Card: Active State --- */
+
+.character-card.active {
+    background: rgba(232, 217, 181, 0.15);
+    box-shadow: inset 0 0 0 1px rgba(232, 217, 181, 0.45);
+}
+
+
+/* --- Info Panel: Transitions --- */
+
+.info-panel {
+    transition:
+        width  0.35s cubic-bezier(.4, 0, .2, 1),
+        height 0.35s cubic-bezier(.4, 0, .2, 1),
+        top    0.35s cubic-bezier(.4, 0, .2, 1),
+        left   0.35s cubic-bezier(.4, 0, .2, 1),
+        transform 0.35s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* --- Info Panel: Expanded State --- */
+
+.info-panel.expanded {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(56vw, 920px);
+    height: 78vh;
+    z-index: 160;
+    border-color: rgba(232, 217, 181, 0.5);
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.7);
+}
+
+.info-panel.expanded .panel-title {
+    font-size: 1rem;
+}
+
+.info-panel.expanded .info-content {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* --- Info Backdrop --- */
+
+.info-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.52);
+    backdrop-filter: blur(2px);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s;
+}
+
+.info-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+/* --- Shared stat rows --- */
+
+.char-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: var(--gap-xs) 0;
+    border-bottom: var(--border);
+}
+
+.char-stat:first-child {
+    border-top: var(--border);
+}
+
+.stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(232, 217, 181, 0.5);
+}
+
+.stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--parchment);
+    letter-spacing: 0.04em;
+}
+
+
+/* --- Info Panel: Character View --- */
+
+.char-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-md);
+    padding: var(--gap-sm) 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.char-portrait {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(232, 217, 181, 0.35);
+    background: rgba(232, 217, 181, 0.08);
+    display: block;
+    flex-shrink: 0;
+}
+
+.char-wiki-link {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    color: var(--parchment);
+    text-decoration: none;
+    text-align: center;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid rgba(232, 217, 181, 0.35);
+    border-radius: 2rem;
+    background: rgba(232, 217, 181, 0.07);
+    transition: background 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.char-wiki-link:hover {
+    background: rgba(232, 217, 181, 0.16);
+    border-color: rgba(232, 217, 181, 0.7);
+}
+
+.char-stats {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Expanded: switch to two-column grid */
+.info-panel.expanded .char-info {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: var(--gap-md) var(--gap-lg);
+    align-items: start;
+    padding: var(--gap-sm) 0;
+}
+
+.info-panel.expanded .char-portrait {
+    width: 9rem;
+    height: 9rem;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.info-panel.expanded .char-wiki-link {
+    grid-column: 1;
+    grid-row: 2;
+    white-space: normal;
+    display: block;
+    margin-top: 0;
+}
+
+.info-panel.expanded .char-stats {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: start;
+}
+
+
+/* --- Extended content (hidden until expanded) --- */
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.char-extended {
+    display: none;
+}
+
+.info-panel.expanded .char-extended {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
+    grid-column: 2;
+    grid-row: 1 / 4;
+    border-left: var(--border);
+    padding-left: var(--gap-lg);
+    overflow-y: auto;
+    min-height: 0;
+    animation: fadeSlideIn 0.25s ease forwards;
+}
+
+.scene-extended {
+    display: none;
+}
+
+.info-panel.expanded .scene-extended {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: var(--gap-sm);
+    padding-top: var(--gap-md);
+    border-top: var(--border);
+    animation: fadeSlideIn 0.25s ease forwards;
+}
+
+.extended-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+}
+
+.section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(232, 217, 181, 0.45);
+    margin: 0 0 var(--gap-xs);
+    font-weight: 400;
+}
+
+
+/* --- Shared bar-row pattern (used for top-scenes and scene-chars) --- */
+
+.bar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: 1fr 5rem auto;
+    gap: var(--gap-sm);
+    align-items: center;
+}
+
+.bar-row-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    color: var(--parchment);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.02em;
+}
+
+.bar-wrap {
+    height: 0.2rem;
+    background: rgba(232, 217, 181, 0.12);
+    border-radius: 0.1rem;
+    overflow: hidden;
+}
+
+.bar-fill {
+    display: block;
+    height: 100%;
+    background: rgba(232, 217, 181, 0.5);
+    border-radius: 0.1rem;
+}
+
+.bar-count {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    color: rgba(232, 217, 181, 0.45);
+    text-align: right;
+    min-width: 1.25rem;
+}
+
+
+/* --- Info Panel: Scene View --- */
+
+.scene-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    padding: var(--gap-xs) 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.scene-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--parchment);
+    letter-spacing: 0.05em;
+    text-align: center;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.scene-film {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.07em;
+    color: rgba(232, 217, 181, 0.4);
+    text-align: center;
+    margin: 0 0 var(--gap-xs);
+    font-style: italic;
+}
+
+/* Scene stats: column by default, row when expanded */
+.scene-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.info-panel.expanded .scene-stats {
+    flex-direction: row;
+    gap: var(--gap-xl);
+    justify-content: center;
+    margin: var(--gap-sm) 0 var(--gap-md);
+}
+
+.info-panel.expanded .scene-stats .char-stat {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    padding: var(--gap-sm) var(--gap-xl);
+    gap: 0.2rem;
+    background: rgba(232, 217, 181, 0.05);
+    border-radius: 0.5rem;
+}
+
+.info-panel.expanded .scene-stats .char-stat:first-child {
+    border-top: none;
+}
+
+.info-panel.expanded .scene-stats .stat-value {
+    font-size: 1.4rem;
+    letter-spacing: 0.02em;
+}
+
+
+/* --- Expand hint --- */
+
+.expand-hint {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.09em;
+    color: rgba(232, 217, 181, 0.45);
+    text-align: center;
+    margin: auto 0 0;
+    padding-top: var(--gap-sm);
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    transition: color 0.2s;
+}
+
+.expand-hint:hover {
+    color: var(--parchment);
+}
+
+.info-panel.expanded .expand-hint {
+    display: none;
+}
+
 
 /* --- Character Map Nodes --- */
 
