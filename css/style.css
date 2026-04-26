@@ -533,6 +533,16 @@ body:has(#overview-toggle:checked) .overview-icon {
     letter-spacing: 0.03em;
 }
 
+.character-description {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.02em;
+    color: rgba(232, 217, 181, 0.75);
+    line-height: 1.65;
+    margin: 0.4rem 0 0;
+    text-align: center;
+}
+
 
 /* --- Timeline Controls --- */
 
@@ -1142,6 +1152,13 @@ body:has(#overview-toggle:checked) .overview-icon {
     margin-bottom: 0.1rem;
 }
 
+.presence-tooltip .pt-count {
+    display: block;
+    font-size: 0.62rem;
+    color: rgba(232, 217, 181, 0.55);
+    margin-bottom: 0.35rem;
+}
+
 
 /* --- CharacterWords bar chart --- */
 
@@ -1229,6 +1246,80 @@ body:has(#overview-toggle:checked) .overview-icon {
 
 .words-chart-scroll::-webkit-scrollbar-thumb:hover {
     background: rgba(232, 217, 181, 0.5);
+}
+
+/* Shared parchment scrollbar for all panel scroll regions */
+.info-content,
+.info-panel.expanded .char-extended,
+.info-panel.expanded .scene-extended,
+.character-panel {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 217, 181, 0.2) transparent;
+}
+
+.info-content::-webkit-scrollbar,
+.info-panel.expanded .char-extended::-webkit-scrollbar,
+.info-panel.expanded .scene-extended::-webkit-scrollbar,
+.character-panel::-webkit-scrollbar {
+    width: 3px;
+}
+
+.info-content::-webkit-scrollbar-track,
+.info-panel.expanded .char-extended::-webkit-scrollbar-track,
+.info-panel.expanded .scene-extended::-webkit-scrollbar-track,
+.character-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.info-content::-webkit-scrollbar-thumb,
+.info-panel.expanded .char-extended::-webkit-scrollbar-thumb,
+.info-panel.expanded .scene-extended::-webkit-scrollbar-thumb,
+.character-panel::-webkit-scrollbar-thumb {
+    background: rgba(232, 217, 181, 0.2);
+    border-radius: 2px;
+}
+
+.info-content::-webkit-scrollbar-thumb:hover,
+.info-panel.expanded .char-extended::-webkit-scrollbar-thumb:hover,
+.info-panel.expanded .scene-extended::-webkit-scrollbar-thumb:hover,
+.character-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(232, 217, 181, 0.45);
+}
+
+
+/* --- CharacterPhrases bar chart --- */
+
+.phrases-section .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(232, 217, 181, 0.6);
+}
+
+.char-phrases-chart {
+    width: 100%;
+    background: rgba(12, 10, 6, 0.75);
+    border: 1px solid rgba(232, 217, 181, 0.18);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.phrases-controls {
+    display: flex;
+    align-items: center;
+    align-self: flex-end;
+}
+
+.phrase-text {
+    cursor: default;
+    transition: opacity 0.15s;
+}
+
+.phrase-text:hover {
+    opacity: 1 !important;
 }
 
 
