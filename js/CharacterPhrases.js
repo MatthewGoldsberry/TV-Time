@@ -120,6 +120,7 @@ class CharacterPhrases {
             sentences.forEach(sentence => {
                 const words = sentence
                     .toLowerCase()
+                    .replace(/-/g, ' ')         // split hyphenated compounds before stripping punctuation
                     .replace(/[^a-z\s']/g, '')
                     .split(/\s+/)
                     .filter(Boolean);

@@ -40,7 +40,7 @@ d3.csv('data/lotr_script_data.csv').then(data => {
         // Corpus-wide n-gram frequency (2–8 words) for phrase distinctiveness scoring.
         // Sentence-split and apostrophe-preserving to match CharacterPhrases extraction exactly.
         (d.dialogue || '').split(/[.!?]+/).forEach(sentence => {
-            const rawWords = sentence.toLowerCase().replace(/[^a-z\s']/g, '').split(/\s+/).filter(Boolean);
+            const rawWords = sentence.toLowerCase().replace(/-/g, ' ').replace(/[^a-z\s']/g, '').split(/\s+/).filter(Boolean);
             for (let n = 2; n <= 8; n++) {
                 for (let i = 0; i <= rawWords.length - n; i++) {
                     const gram = rawWords.slice(i, i + n).join(' ');
