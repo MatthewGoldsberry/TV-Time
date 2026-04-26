@@ -7,10 +7,12 @@ import string
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
+import os
+from nltk.stem import WordNetLemmatizer
 # becuase for some reason these don't download alongside nltk...
 nltk.download('punkt_tab')
 nltk.download('stopwords')
+nltk.download('wordnet')
 
 # scrape the main page to get scene names
 main_page = req.get("https://www.tk421.net/lotr/film/")
@@ -32,6 +34,12 @@ if main_page:
                     scene_names[film] = {}
                 scene_names[film][scene_num] = title
 
+FILM_NAMES = {
+    'fotr': 'The Fellowship of the Ring',
+    'ttt':  'The Two Towers',
+    'rotk': 'The Return of the King',
+}
+
 # List of films to process
 films = ['fotr', 'ttt', 'rotk']
 all_dialogues = []
@@ -48,18 +56,19 @@ def normalize_unicode(text):
     text = unicodedata.normalize('NFKC', text)
     return text
 
-# Text cleaning, normalization, and stemming
-def clean_and_stem(text):
+# Text cleaning and lemmatization for word-frequency analysis
+def clean_text(text):
     text = normalize_unicode(text)
     text = text.lower()
+    # Punctuation removal joins hyphenated compounds ("pipe-weed" → "pipeweed")
     text = text.translate(str.maketrans('', '', string.punctuation))
     text = re.sub(r'\s+', ' ', text).strip()
     tokens = word_tokenize(text)
     stop_words = set(stopwords.words('english'))
-    tokens = [w for w in tokens if w not in stop_words]
-    stemmer = PorterStemmer()
-    stemmed = [stemmer.stem(w) for w in tokens]
-    return ' '.join(stemmed)
+    # isalpha() drops digits/fragments; non-English words (Elvish etc.) pass through unchanged
+    tokens = [w for w in tokens if w.isalpha() and w not in stop_words]
+    lemmatizer = WordNetLemmatizer()
+    return ' '.join(lemmatizer.lemmatize(w) for w in tokens)
 
 for film in films:
     print(f"Processing {film}...")
@@ -86,6 +95,7 @@ for film in films:
                 dialogue_entries.append({
                     'scene_name': scene_name,
                     'character': 'Galadriel',
+                    'film': FILM_NAMES[film],
                     'dialogue': (
                         'I amar prestar aen… The world is changed. Han mathon ne nen… I feel it in the water. Han mathon ne chae… I feel it in the Earth. A han noston ned gwilith… I smell it in the air.'
                     )
@@ -119,6 +129,7 @@ for film in films:
                         dialogue_entries.append({
                             'scene_name': scene_name,
                             'character': speaker,
+                            'film': FILM_NAMES[film],
                             'dialogue': dialogue
                         })
             # For Fellowship scene 1, keep prologue and skip the next entry (title)
@@ -130,20 +141,19 @@ for film in films:
                 elif len(dialogue_entries) == 2:
                     pass  # Only prologue and title, just keep prologue
                 for entry in entries_to_add:
-                    entry['dialogue_cleaned'] = clean_and_stem(entry['dialogue'])
+                    entry['dialogue_cleaned'] = clean_text(entry['dialogue'])
                     all_dialogues.append(entry)
             else:
                 # For all other scenes, skip the first entry (title)
                 for entry in dialogue_entries[1:]:
-                    entry['dialogue_cleaned'] = clean_and_stem(entry['dialogue'])
+                    entry['dialogue_cleaned'] = clean_text(entry['dialogue'])
                     all_dialogues.append(entry)
         else:
             print(f"Error fetching {url}")
 
 # Preserve location field if it exists in the current CSV
-import os
 existing_locations = {}
-csv_path = os.path.join(os.path.dirname(__file__), 'data.csv')
+csv_path = os.path.join(os.path.dirname(__file__), 'lotr_script_data.csv')
 if os.path.exists(csv_path):
     with open(csv_path, 'r', encoding='utf-8', newline='') as f:
         reader = csv.DictReader(f)
@@ -153,7 +163,7 @@ if os.path.exists(csv_path):
             existing_locations[key] = row.get('location', '')
 
 # Write to CSV, preserving location if present
-fieldnames = ['scene_name', 'character', 'dialogue', 'dialogue_cleaned', 'location']
+fieldnames = ['film', 'scene_name', 'character', 'dialogue', 'dialogue_cleaned', 'location']
 with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
@@ -162,6 +172,7 @@ with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
         key = (entry['scene_name'], entry['character'], normalize_unicode(entry['dialogue']))
         location = existing_locations.get(key, '')
         row = {
+            'film': entry['film'],
             'scene_name': entry['scene_name'],
             'character': entry['character'],
             'dialogue': normalize_unicode(entry['dialogue']),
