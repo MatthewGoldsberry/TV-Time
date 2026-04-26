@@ -88,7 +88,7 @@ function showFellowshipStartPositionsForCurrentScene(svgSelector = 'svg') {
 }
 
 function placeMarkersOnMap(svgSelector = 'svg') {
-    d3.csv('data/data.csv').then(data => {
+    d3.csv('data/lotr_script_data.csv').then(data => {
         // Data format: scene_name,character,dialogue,dialogue_cleaned,location
         // location is either empty or 'cx cy' (e.g., '692.4 279')
         _markerData = data
