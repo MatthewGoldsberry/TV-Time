@@ -10,13 +10,6 @@ function getCurrentSceneName() {
     return selectedOption ? selectedOption.textContent : null;
 }
 
-
-// Fellowship characters
-const FELLOWSHIP = [
-    'Frodo', 'Sam', 'Pippin', 'Merry', 'Aragorn', 'Strider', 'Boromir',
-    'Gandalf', 'Gimli', 'Legolas'
-];
-
 // Get the starting position for each character in a given scene
 function getFellowshipStartPositionsForScene(sceneName) {
     if (!_markerData || !sceneName) return [];
@@ -25,7 +18,7 @@ function getFellowshipStartPositionsForScene(sceneName) {
     for (const d of _markerData) {
         let charName = d.character;
         if (charName === 'Strider') charName = 'Aragorn';
-        if (FELLOWSHIP.includes(d.character) && d.scene_name === sceneName && !seen.has(charName)) {
+        if (FELLOWSHIP.has(d.character) && d.scene_name === sceneName && !seen.has(charName)) {
             starts.push({ ...d, character: charName });
             seen.add(charName);
         }
