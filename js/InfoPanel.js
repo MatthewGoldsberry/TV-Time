@@ -327,7 +327,6 @@ class InfoPanel {
         const sceneName = SCENE_NAMES[index] ?? '';
         const stats     = this.sceneStats[sceneName];
         const filmName  = FILM_NAMES[Math.floor(index / 32)] ?? '';
-        const imgSrc    = `data/images/scene/${index}.png`;
 
         const fmt = v => (v != null && v !== 0) ? v.toLocaleString() : '—';
 
@@ -350,7 +349,6 @@ class InfoPanel {
                         <span class="stat-value">${stats?.fellowshipCount != null ? `${stats.fellowshipCount} / 9` : '— / 9'}</span>
                     </div>
                 </div>
-                <img class="scene-thumb" src="${imgSrc}" alt="${sceneName}" onerror="this.style.display='none'">
                 <div class="scene-extended">
                     <div class="extended-section is-open">
                         <div class="section-header">
