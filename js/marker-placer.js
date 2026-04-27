@@ -31,6 +31,27 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
     if (svg.empty()) return;
     svg.selectAll('.character-marker').remove();
 
+    // Add drop shadow filter if not present
+    let defs = svg.select('defs');
+    if (defs.empty()) {
+        defs = svg.append('defs');
+    }
+    let shadow = defs.select('#marker-drop-shadow');
+    if (shadow.empty()) {
+        shadow = defs.append('filter')
+            .attr('id', 'marker-drop-shadow')
+            .attr('x', '-30%')
+            .attr('y', '-30%')
+            .attr('width', '160%')
+            .attr('height', '160%');
+        shadow.append('feDropShadow')
+            .attr('dx', 2)
+            .attr('dy', 2)
+            .attr('stdDeviation', 2)
+            .attr('flood-color', '#000')
+            .attr('flood-opacity', 0.6);
+    }
+
     // Group by (cx, cy) to find overlapping markers
     const grouped = {};
     positions.forEach(d => {
@@ -69,6 +90,7 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
             return `${'data/images/'}${imgName}-modified.png`;
         })
         .attr('data-character', d => d.character)
+        .attr('filter', 'url(#marker-drop-shadow)')
         .append('title')
         .text(d => `${d.character}`);
 }
