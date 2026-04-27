@@ -1,5 +1,5 @@
 // Update markers for the current scene
-function updateMarkersForCurrentScene(svgSelector = 'svg') {
+function updateMarkersForCurrentScene(svgSelector = '#svgMap') {
     showFellowshipStartPositionsForCurrentScene(svgSelector);
 }
 // marker-placer.js
@@ -20,17 +20,15 @@ function getFellowshipStartPositionsForScene(sceneName) {
     const seen = new Set();
     const starts = [];
     for (const d of _markerData) {
-        let charName = d.character;
-        if (charName === 'Strider') charName = 'Aragorn';
-        if (FELLOWSHIP.has(d.character) && d.scene_name === sceneName && !seen.has(charName)) {
-            starts.push({ ...d, character: charName });
-            seen.add(charName);
+        if (FELLOWSHIP.has(d.character) && d.scene_name === sceneName && !seen.has(d.character)) {
+            starts.push(d);
+            seen.add(d.character);
         }
     }
     return starts;
 }
 
-function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
+function showCharacterMarkersAtPositions(positions, svgSelector = '#svgMap') {
     const svg = d3.select(svgSelector);
     if (svg.empty()) return;
     svg.selectAll('.character-marker').remove();
@@ -89,10 +87,7 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
         .attr('y', d => d.cy - 16 + d.offsetY)
         .attr('width', 32)
         .attr('height', 32)
-        .attr("xlink:href", d => {
-            const imgName = (d.character === 'Strider') ? 'Aragorn' : d.character;
-            return `${'data/images/'}${imgName}.png`;
-        })
+        .attr("xlink:href", d => `${'data/images/'}${d.character}.png`)
         .attr('data-character', d => d.character)
         .attr('filter', 'url(#marker-drop-shadow)')
         .append('title')
@@ -100,13 +95,13 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
 }
 
 // Show only the starting position for each character in the selected scene
-function showFellowshipStartPositionsForCurrentScene(svgSelector = 'svg') {
+function showFellowshipStartPositionsForCurrentScene(svgSelector = '#svgMap') {
     const sceneName = getCurrentSceneName();
     const starts = getFellowshipStartPositionsForScene(sceneName);
     showCharacterMarkersAtPositions(starts, svgSelector);
 }
 
-function placeMarkersOnMap(svgSelector = 'svg') {
+function placeMarkersOnMap(svgSelector = '#svgMap') {
     d3.csv('data/lotr_script_data.csv').then(data => {
         // Data format: scene_name,character,dialogue,dialogue_cleaned,location
         // location is either empty or 'cx cy' (e.g., '692.4 279')
@@ -123,43 +118,13 @@ function placeMarkersOnMap(svgSelector = 'svg') {
             .filter(d => !isNaN(d.cx) && !isNaN(d.cy));
 
         updateMarkersForCurrentScene(svgSelector);
-
-        // Listen for scene changes
-        const slider = document.getElementById('timelineSlider');
-        const dropdown = document.getElementById('sceneSelect');
-        if (slider) {
-            slider.addEventListener('input', () => updateMarkersForCurrentScene(svgSelector));
-        }
-        if (dropdown) {
-            dropdown.addEventListener('change', () => updateMarkersForCurrentScene(svgSelector));
-        }
     }).catch(err => {
         console.error('Error loading marker data:', err);
     });
 }
 
-// Optionally, call automatically if SVG is present
-if (document.readyState !== 'loading') {
-    placeMarkersOnMap();
-    setTimeout(() => showFellowshipStartPositionsForCurrentScene(), 500);
-} else {
-    document.addEventListener('DOMContentLoaded', () => {
-        placeMarkersOnMap();
-        setTimeout(() => showFellowshipStartPositionsForCurrentScene(), 500);
-    });
-}
-
-// Listen for scene changes to update markers
-document.addEventListener('DOMContentLoaded', () => {
-    const slider = document.getElementById('timelineSlider');
-    const dropdown = document.getElementById('sceneSelect');
-    if (slider) {
-        slider.addEventListener('input', () => showFellowshipStartPositionsForCurrentScene());
-    }
-    if (dropdown) {
-        dropdown.addEventListener('change', () => showFellowshipStartPositionsForCurrentScene());
-    }
-});
+// Initialize on load
+placeMarkersOnMap();
 
 // Export for manual use and animation
 window.placeMarkersOnMap = placeMarkersOnMap;
