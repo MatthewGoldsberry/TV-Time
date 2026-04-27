@@ -1480,3 +1480,15 @@ body:has(#overview-toggle:checked) .overview-icon {
     cursor: grabbing;
     box-shadow: 0 4px 16px rgba(0,0,0,0.35);
 }
+
+/* --- Map Character Marker Hover Effect --- */
+svg .character-marker {
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.4, 1.4, 0.6, 1), filter 0.18s;
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+}
+svg .character-marker:hover {
+    transform: scale(1.32);
+    filter: brightness(1.08) drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+}
