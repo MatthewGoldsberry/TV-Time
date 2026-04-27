@@ -3,18 +3,8 @@
  * Arc size = total shared scenes for a character; ribbon weight = shared scenes between a pair.
  */
 
-// Similar colors to character icons with slightly more vibrancy
-const CHORD_COLORS = [
-    'rgba(158,32,62,0.68)', // Frodo
-    'rgba(125,72,32,0.68)', // Sam
-    'rgba(172,82,28,0.68)', // Merry
-    'rgba(192,142,8,0.68)', // Pippin
-    'rgba(161,161,161,0.68)', // Gandalf
-    'rgba(42,122,52,0.68)', // Aragorn
-    'rgba(128,48,168,0.68)', // Legolas
-    'rgba(88,78,68,0.68)', // Gimli
-    'rgba(42,88,172,0.68)', // Boromir
-];
+// Derived from CHARACTER_COLORS in main.js — same RGB base, chord-specific alpha
+const CHORD_COLORS = FELLOWSHIP_ORDER.map(name => characterColor(name, 0.68));
 
 class CharacterChord {
 
