@@ -49,3 +49,79 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// --- PlayBtn Animation for Trilogy ---
+document.addEventListener('DOMContentLoaded', function () {
+    let playInterval = null;
+    let isPlaying = false;
+    const playBtn = document.getElementById('playBtn');
+    const timelineSlider = document.getElementById('timelineSlider');
+    const sceneSelect = document.getElementById('sceneSelect');
+    
+    if (!playBtn || !timelineSlider || !sceneSelect) return;
+    
+    const totalScenesDom = parseInt(timelineSlider.max, 10);
+
+    function setPlayBtnState(playing) {
+        playBtn.classList.toggle('playing', playing);
+        playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+        playBtn.textContent = playing ? '⏸' : '▶';
+    }
+
+    function animateScenes() {
+        let idx = parseInt(timelineSlider.value, 10);
+        if (idx >= totalScenesDom) {
+            stopAnimation();
+            return;
+        }
+        idx++;
+        timelineSlider.value = idx;
+        sceneSelect.value = idx;
+        document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+        if (window.showFellowshipStartPositionsForCurrentScene) {
+            window.showFellowshipStartPositionsForCurrentScene();
+        }
+        if (window.infoPanel && window.infoPanel.showScene) {
+            window.infoPanel.showScene(idx);
+        }
+        if (idx >= totalScenesDom) {
+            stopAnimation();
+        }
+    }
+
+    function startAnimation() {
+        if (isPlaying) return;
+        isPlaying = true;
+        setPlayBtnState(true);
+        playInterval = setInterval(animateScenes, 1200); // 1.2s per scene
+    }
+
+    function stopAnimation() {
+        isPlaying = false;
+        setPlayBtnState(false);
+        if (playInterval) {
+            clearInterval(playInterval);
+            playInterval = null;
+        }
+    }
+
+    // Set initial icon
+    setPlayBtnState(false);
+
+    playBtn.addEventListener('click', () => {
+        if (isPlaying) {
+            stopAnimation();
+        } else {
+            // If at end, reset to start
+            if (parseInt(timelineSlider.value, 10) >= totalScenesDom) {
+                timelineSlider.value = 0;
+                sceneSelect.value = 0;
+                if (window.infoPanel && window.infoPanel.showScene) {
+                    window.infoPanel.showScene(0);
+                }
+            }
+            startAnimation();
+        }
+    });
+});
+
