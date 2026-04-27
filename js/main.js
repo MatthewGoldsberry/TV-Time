@@ -4,6 +4,10 @@
 
 // class elements
 let infoPanel;
+let chordVis;
+
+// only used by CharacterCord since CharacterCord can edit it
+const FELLOWSHIP_ORDER = ['Frodo','Sam','Merry','Pippin','Gandalf','Aragorn','Legolas','Gimli','Boromir'];
 
 d3.csv('data/lotr_script_data.csv').then(data => {
     const characterStats = {};
@@ -11,6 +15,7 @@ d3.csv('data/lotr_script_data.csv').then(data => {
     const corpusWordFreq = {};
     const corpusNgramFreq = {};
     const sceneStats = {};
+    const sceneFilm = {};
 
     data.forEach(d => {
         // Parse coordinates and word count
@@ -56,6 +61,7 @@ d3.csv('data/lotr_script_data.csv').then(data => {
         sceneStats[d.scene_name].lines++;
         sceneStats[d.scene_name].characters.add(d.character);
         if (FELLOWSHIP.has(d.character)) sceneStats[d.scene_name].fellowship.add(d.character);
+        if (!sceneFilm[d.scene_name]) sceneFilm[d.scene_name] = d.film;
     });
 
     // Convert flattened sets to counts
@@ -63,6 +69,33 @@ d3.csv('data/lotr_script_data.csv').then(data => {
         s.sceneCount = s.scenes.size;
         delete s.scenes;
     });
+
+    // Build fellowship interaction matrix from scene character sets
+    const makeMatrix = () => FELLOWSHIP_ORDER.map(() => FELLOWSHIP_ORDER.map(() => 0));
+    const interactionMatrix = {
+        all: makeMatrix(),
+        'The Fellowship of the Ring': makeMatrix(),
+        'The Two Towers': makeMatrix(),
+        'The Return of the King': makeMatrix(),
+    };
+    Object.entries(sceneStats).forEach(([scene, stats]) => {
+        const film = sceneFilm[scene];
+        const indices = [...stats.characters]
+            .map(c => FELLOWSHIP_ORDER.indexOf(c))
+            .filter(i => i >= 0);
+        for (let a = 0; a < indices.length; a++) {
+            for (let b = a + 1; b < indices.length; b++) {
+                const [i, j] = [indices[a], indices[b]];
+                interactionMatrix.all[i][j]++;
+                interactionMatrix.all[j][i]++;
+                if (film) {
+                    interactionMatrix[film][i][j]++;
+                    interactionMatrix[film][j][i]++;
+                }
+            }
+        }
+    });
+
     Object.values(sceneStats).forEach(s => {
         s.characterCount = s.characters.size;
         s.fellowshipCount = s.fellowship.size;
@@ -83,12 +116,59 @@ d3.csv('data/lotr_script_data.csv').then(data => {
     );
     infoPanel.showScene(0);
 
+    // Initialize chord diagram in the viz panel
+    chordVis = new CharacterChord(
+        { parentElement: document.querySelector('.chord-container') },
+        { interactionMatrix, fellowshipOrder: FELLOWSHIP_ORDER }
+    );
+
 }).catch(err => console.error('Data load error:', err));
 
 
 /**
  * Event handlers
  */
+
+// Ensure the shared tooltip element exists at startup so chord + info icons can use it immediately
+if (!document.getElementById('presence-tooltip')) {
+    const tip = document.createElement('div');
+    tip.id = 'presence-tooltip';
+    tip.className = 'presence-tooltip';
+    tip.style.display = 'none';
+    document.body.appendChild(tip);
+}
+
+// Chord diagram info icon tooltip
+const chordInfoIcon = document.querySelector('.chord-info-icon');
+if (chordInfoIcon) {
+    const getTooltip = () => document.getElementById('presence-tooltip');
+    chordInfoIcon.addEventListener('mouseover', e => {
+        const tip = getTooltip();
+        if (!tip) return;
+        tip.style.display = 'block';
+        tip.style.left = (e.pageX + 10) + 'px';
+        tip.style.top  = (e.pageY + 10) + 'px';
+        tip.innerHTML  = '<span class="pt-name">Scene Co-occurrence</span>'
+            + '<strong>Arcs</strong> represent each Fellowship member — size reflects total scenes with spoken dialogue. '
+            + '<strong>Ribbons</strong> connect pairs who share scenes — thickness reflects how many scenes they share. '
+            + '<br><br>Click an arc to lock its connections. Click again or press <strong>Esc</strong> to clear.';
+    });
+    chordInfoIcon.addEventListener('mousemove', e => {
+        const tip = getTooltip();
+        if (!tip) return;
+        tip.style.left = (e.pageX + 10) + 'px';
+        tip.style.top  = (e.pageY + 10) + 'px';
+    });
+    chordInfoIcon.addEventListener('mouseout', () => {
+        const tip = getTooltip();
+        if (tip) tip.style.display = 'none';
+    });
+}
+
+// Film filter dropdown for chord visualization
+document.querySelector('.chord-film-select').addEventListener('change', e => {
+    chordVis.updateVis(e.target.value);
+});
 
 // Toggle character view when a fellowship card is clicked; re-click deselects
 document.querySelectorAll('.character-card').forEach(card => {
