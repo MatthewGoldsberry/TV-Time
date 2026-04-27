@@ -87,7 +87,7 @@ function showCharacterMarkersAtPositions(positions, svgSelector = 'svg') {
         .attr('height', 32)
         .attr("xlink:href", d => {
             const imgName = (d.character === 'Strider') ? 'Aragorn' : d.character;
-            return `${'data/images/'}${imgName}-modified.png`;
+            return `${'data/images/'}${imgName}.png`;
         })
         .attr('data-character', d => d.character)
         .attr('filter', 'url(#marker-drop-shadow)')
