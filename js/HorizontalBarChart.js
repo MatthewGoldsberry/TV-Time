@@ -1,24 +1,29 @@
 /**
- * CharacterWords - scrollable horizontal bar chart of a character's top words, with a film filter and a Most Used / Most Unique toggle.
+ * HorizontalBarChart - scrollable horizontal bar chart.
+ * dataMode 'words': top words from character dialogue with film filter and freq/unique/rate toggle.
+ * dataMode 'lines': line counts per character, aggregated from scene rows.
  */
-class CharacterWords {
+class HorizontalBarChart {
 
     /**
-     * @param {Object} _config - parentElement (the scroll container div)
-     * @param {Array}  _data - all CSV rows for the character
-     * @param {Object} _corpusWordFreq - corpus-wide word frequencies for unique-word scoring
+     * @param {Object} _config - parentElement, dataMode, colorFn, maxRows, rowHeight
+     * @param {Array}  _data - CSV rows (character rows for 'words', scene rows for 'lines')
+     * @param {Object} _corpusWordFreq - corpus-wide word frequencies (only used in 'words' mode)
      */
     constructor(_config, _data, _corpusWordFreq) {
         this.config = {
             parentElement:  _config.parentElement,
             containerWidth: 420,
-            rowHeight: 22,
+            rowHeight:  _config.rowHeight ?? 22,
             margin: { top: 6, right: 52, bottom: 6, left: 95 },
+            colorFn:  _config.colorFn  || null,
+            maxRows:  _config.maxRows  ?? 10,
+            dataMode: _config.dataMode || 'words',  // 'words' | 'lines'
         };
         this.data = _data;
         this.corpusWordFreq = _corpusWordFreq;
         this.film = 'all';
-        this.mode = 'freq';
+        this.scoreMode = 'freq';  // 'freq' | 'unique' | 'rate' 
         this.initVis();
     }
 
@@ -50,41 +55,46 @@ class CharacterWords {
     }
 
     /**
-     * Filters data by film, scores words by freq or uniqueness, updates scales and SVG height
-     * @param {string} [film] - 'all' or full film name
-     * @param {string} [mode] - 'freq' or 'unique'
+     * Aggregates data, updates scales and SVG height
+     * @param {string} [film] - 'all' or full film name (words mode only)
+     * @param {string} [scoreMode] - 'freq' | 'unique' | 'rate' (words mode only)
      */
-    updateVis(film, mode) {
+    updateVis(film, scoreMode) {
         let vis = this;
         if (film !== undefined) vis.film = film;
-        if (mode !== undefined) vis.mode = mode;
+        if (scoreMode !== undefined) vis.scoreMode = scoreMode;
 
-        const filtered = vis.film === 'all'
-            ? vis.data
-            : vis.data.filter(d => d.film === vis.film);
+        if (vis.config.dataMode === 'lines') {
+            // Count dialogue lines per character
+            const counts = {};
+            vis.data.forEach(r => { counts[r.character] = (counts[r.character] || 0) + 1; });
+            vis.words = Object.entries(counts)
+                .map(([name, n]) => ({ word: name, score: n }))
+                .sort((a, b) => b.score - a.score);
+        } else {
+            // Word frequency with a filter by film, and score by freq/unique/rate
+            const filtered = vis.film === 'all'
+                ? vis.data
+                : vis.data.filter(d => d.film === vis.film);
 
-        // Build per-character word frequency from dialogue_cleaned
-        const charFreq = {};
-        filtered.forEach(d => {
-            (d.dialogue_cleaned || '').split(' ').filter(Boolean).forEach(w => {
-                charFreq[w] = (charFreq[w] || 0) + 1;
+            const charFreq = {};
+            filtered.forEach(d => {
+                (d.dialogue_cleaned || '').split(' ').filter(Boolean).forEach(w => {
+                    charFreq[w] = (charFreq[w] || 0) + 1;
+                });
             });
-        });
 
-        const totalLines = filtered.length || 1;
-
-        // Score each word by raw frequency, relative uniqueness vs. corpus, or % of lines
-        const scored = Object.entries(charFreq).map(([w, f]) => ({
-            word:  w,
-            score: vis.mode === 'unique'
-                ? (f / ((vis.corpusWordFreq[w] || 0) + 1)) * 100
-                : vis.mode === 'rate'
-                    ? (f / totalLines) * 100
-                    : f,
-        }));
-
-        // Sort descending, all words; band scale maps index 0 → top of chart
-        vis.words = scored.sort((a, b) => b.score - a.score);
+            const totalLines = filtered.length || 1;
+            const scored = Object.entries(charFreq).map(([w, f]) => ({
+                word:  w,
+                score: vis.scoreMode === 'unique'
+                    ? (f / ((vis.corpusWordFreq[w] || 0) + 1)) * 100
+                    : vis.scoreMode === 'rate'
+                        ? (f / totalLines) * 100
+                        : f,
+            }));
+            vis.words = scored.sort((a, b) => b.score - a.score);
+        }
 
         // Grow the SVG height to fit all bars exactly
         vis.height = vis.words.length * vis.config.rowHeight;
@@ -99,8 +109,7 @@ class CharacterWords {
     }
 
     /**
-     * Sets the scroll container height so exactly 10 rows (or fewer if less data) are visible.
-     * Measures the container's rendered pixel width and converts viewBox units to pixels.
+     * Sets the scroll container height so exactly maxRows (or fewer) are visible.
      */
     _syncScrollHeight() {
         let vis = this;
@@ -112,13 +121,12 @@ class CharacterWords {
         const rowPx = vis.config.rowHeight * scale;
         const marginPx = (vis.config.margin.top + vis.config.margin.bottom) * scale;
 
-        // Cap at actual word count so characters with < 10 unique words don't leave dead space
-        const visibleRows = Math.min(10, vis.words.length);
+        const visibleRows = Math.min(vis.config.maxRows, vis.words.length);
         vis.config.parentElement.style.height = Math.round(visibleRows * rowPx + marginPx) + 'px';
     }
 
     /**
-     * Draws or updates bars, end-labels, and y-axis word labels
+     * Draws or updates bars, end-labels, and y-axis labels
      */
     renderVis() {
         let vis = this;
@@ -132,7 +140,7 @@ class CharacterWords {
             .attr('height', vis.yScale.bandwidth())
             .attr('x', 0)
             .attr('rx', 2)
-            .attr('fill', 'rgba(232,217,181,0.55)')
+            .attr('fill', d => vis.config.colorFn ? vis.config.colorFn(d) : 'rgba(232,217,181,0.55)')
             .transition().duration(280)
             .attr('width', d => vis.xScale(d.score));
 
@@ -148,9 +156,9 @@ class CharacterWords {
             .style('font-size', '8px')
             .transition().duration(280)
             .attr('x', d => vis.xScale(d.score) + 5)
-            .text(d => vis.mode === 'freq' ? d.score : `${d.score.toFixed(1)}%`);
+            .text(d => vis.scoreMode === 'freq' ? d.score : `${d.score.toFixed(1)}%`);
 
-        // Y-axis with word labels only
+        // Y-axis with labels only
         vis.yAxisG
             .call(d3.axisLeft(vis.yScale).tickSize(0))
             .call(g => g.select('.domain').remove())

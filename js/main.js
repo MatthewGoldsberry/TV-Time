@@ -6,8 +6,28 @@
 let infoPanel;
 let chordVis;
 
-// only used by CharacterCord since CharacterCord can edit it
 const FELLOWSHIP_ORDER = ['Frodo','Sam','Merry','Pippin','Gandalf','Aragorn','Legolas','Gimli','Boromir'];
+
+// Derived Set for membership tests
+const FELLOWSHIP = new Set(FELLOWSHIP_ORDER);
+
+// Base RGB per character
+const CHARACTER_COLORS = {
+    'Frodo':   [158,  32,  62],
+    'Sam':     [125,  72,  32],
+    'Merry':   [172,  82,  28],
+    'Pippin':  [192, 142,   8],
+    'Gandalf': [161, 161, 161],
+    'Aragorn': [ 42, 122,  52],
+    'Legolas': [128,  48, 168],
+    'Gimli':   [ 88,  78,  68],
+    'Boromir': [ 42,  88, 172],
+};
+
+function characterColor(name, alpha) {
+    const rgb = CHARACTER_COLORS[name];
+    return rgb ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})` : `rgba(232,217,181,${alpha})`;
+}
 
 d3.csv('data/lotr_script_data.csv').then(data => {
     const characterStats = {};

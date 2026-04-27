@@ -13,7 +13,7 @@ const PHRASE_FILLER_WORDS = new Set([
 
 // Named characters used to block "[filler word] [name]" address patterns in 2-grams
 const SCRIPT_NAMES = new Set([
-    'frodo','sam','merry','pippin','gandalf','aragorn','legolas','gimli','boromir',
+    ...FELLOWSHIP_ORDER.map(n => n.toLowerCase()),
     'sauron','saruman','gollum','smeagol','arwen','eowyn','faramir','theoden',
     'elrond','bilbo','treebeard','grima',
 ]);

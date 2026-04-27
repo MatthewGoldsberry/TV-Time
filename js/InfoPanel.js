@@ -7,8 +7,6 @@ const SCENE_NAMES = Array.from(document.querySelectorAll('#sceneSelect option'))
 
 const FILM_NAMES = [ 'The Fellowship of the Ring', 'The Two Towers', 'The Return of the King'];
 
-const FELLOWSHIP = new Set(['Frodo', 'Sam', 'Merry', 'Pippin', 'Gandalf', 'Aragorn', 'Legolas', 'Gimli', 'Boromir']);
-
 // Tolkien Gateway URLs keyed by character name
 const CHARACTER_WIKI_URLS = {
     'Frodo': 'https://tolkiengateway.net/wiki/Frodo_Baggins',
@@ -85,9 +83,12 @@ class InfoPanel {
         this.backdrop.classList.toggle('visible', expand);
         this.expandBtn.innerHTML = expand ? '&#x2715;' : '&#x26F6;';
         this.expandBtn.setAttribute('aria-label', expand ? 'Collapse' : 'Expand');
-        // Sync words chart height once the panel reaches its final expanded width.
-        if (expand && this.wordsVis) {
-            const sync = () => { if (this.wordsVis) this.wordsVis._syncScrollHeight(); };
+        // Sync chart heights once the panel reaches its final expanded width.
+        if (expand && (this.wordsVis || this.sceneCharsVis)) {
+            const sync = () => {
+                if (this.wordsVis) this.wordsVis._syncScrollHeight();
+                if (this.sceneCharsVis) this.sceneCharsVis._syncScrollHeight();
+            };
             const onEnd = e => {
                 if (e.propertyName !== 'width') return;
                 this.panel.removeEventListener('transitionend', onEnd);
@@ -227,8 +228,8 @@ class InfoPanel {
 
         // Initialize top-words bar chart
         this.wordsVis = null;
-        const wordsVis = new CharacterWords(
-            { parentElement: this.contentEl.querySelector('.words-chart-scroll') },
+        const wordsVis = new HorizontalBarChart(
+            { parentElement: this.contentEl.querySelector('.words-chart-scroll'), dataMode: 'words' },
             this.characterData[name] || [],
             this.corpusWordFreq
         );
@@ -349,11 +350,84 @@ class InfoPanel {
                         <span class="stat-value">${stats?.fellowshipCount != null ? `${stats.fellowshipCount} / 9` : '— / 9'}</span>
                     </div>
                 </div>
+                <img class="scene-thumb" src="${imgSrc}" alt="${sceneName}" onerror="this.style.display='none'">
                 <div class="scene-extended">
-                    <p class="section-label">Speaking Characters</p>
-                    <ul class="bar-list"></ul>
+                    <div class="extended-section is-open">
+                        <div class="section-header">
+                            <span class="section-title">Speaking Characters</span>
+                            <span class="section-caret"></span>
+                        </div>
+                        <div class="section-body">
+                            <div class="scene-chars-chart">
+                                <div class="words-scroll-wrap">
+                                    <div class="scene-chars-scroll"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="extended-section">
+                        <div class="section-header">
+                            <span class="section-title">Scene Script</span>
+                            <span class="section-caret"></span>
+                        </div>
+                        <div class="section-body scene-script-body">
+                            <div class="scene-transcript"></div>
+                        </div>
+                    </div>
                 </div>
                 ${EXPAND_HINT}
             </div>`;
+
+        // Speaking characters bar chart
+        const sceneRows = this.data.filter(r => r.scene_name === sceneName);
+
+        this.sceneCharsVis = new HorizontalBarChart(
+            {
+                parentElement: this.contentEl.querySelector('.scene-chars-scroll'),
+                dataMode: 'lines',
+                colorFn: d => characterColor(d.word, 0.9),
+                maxRows: 6,
+                rowHeight: 16,
+            },
+            sceneRows,
+            null
+        );
+
+        // Scene transcript visualization
+
+        // Merge consecutive rows from the same speaker into one screenplay block
+        const beats = [];
+        sceneRows.forEach(r => {
+            if (beats.length && beats[beats.length - 1].character === r.character) {
+                beats[beats.length - 1].lines.push(r.dialogue);
+            } else {
+                beats.push({ character: r.character, lines: [r.dialogue] });
+            }
+        });
+
+        // Place in panel
+        const transcript = this.contentEl.querySelector('.scene-transcript');
+        beats.forEach(beat => {
+            const div = document.createElement('div');
+            div.className = 'transcript-entry';
+            div.style.setProperty('--char-color', characterColor(beat.character, 0.9));
+            div.innerHTML = `
+                <span class="transcript-character">${beat.character}</span>
+                <div class="transcript-lines">
+                    ${beat.lines.map(l => `<p class="transcript-dialogue">${l}</p>`).join('')}
+                </div>`;
+            transcript.appendChild(div);
+        });
+
+        // Wire collapsible section headers and re-sync chart height when chars section re-opens
+        this.contentEl.querySelectorAll('.scene-extended .extended-section').forEach(section => {
+            section.querySelector('.section-header')?.addEventListener('click', () => {
+                const opening = !section.classList.contains('is-open');
+                section.classList.toggle('is-open');
+                if (opening && this.sceneCharsVis) {
+                    requestAnimationFrame(() => this.sceneCharsVis._syncScrollHeight());
+                }
+            });
+        });
     }
 }
