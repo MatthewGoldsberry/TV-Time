@@ -1,3 +1,7 @@
+// Update markers for the current scene
+function updateMarkersForCurrentScene(svgSelector = 'svg') {
+    showFellowshipStartPositionsForCurrentScene(svgSelector);
+}
 // marker-placer.js
 
 let _markerData = null;

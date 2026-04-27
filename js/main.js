@@ -105,26 +105,51 @@ document.querySelectorAll('.character-card').forEach(card => {
     });
 });
 
-// TODO add handler to toggle fellowship card when character icon is clicked
+
+// Toggle fellowship card and info panel when a character marker is clicked
+document.getElementById('svgMap').addEventListener('click', e => {
+    const marker = e.target.closest('.character-marker');
+    if (marker) {
+        const name = marker.getAttribute('data-character');
+        const card = Array.from(document.querySelectorAll('.character-card'))
+            .find(c => c.querySelector('.character-name')?.textContent.trim() === name);
+        const isActive = card && card.classList.contains('active');
+        document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+        if (card && !isActive) {
+            card.classList.add('active');
+            infoPanel.showCharacter(name);
+        } else {
+            infoPanel.showScene(+document.getElementById('timelineSlider').value);
+        }
+        // Prevent map click handler from immediately deselecting
+        e.stopPropagation();
+    }
+});
 
 // Sync dropdown and update scene info on slider move
 document.getElementById('timelineSlider').addEventListener('input', e => {
     const idx = +e.target.value;
     document.getElementById('sceneSelect').value = idx;
-    if (!document.querySelector('.character-card.active')) infoPanel.showScene(idx);
+    // Clear character selection
+    document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+    window.showFellowshipStartPositionsForCurrentScene();
+    infoPanel.showScene(idx);
 });
 
 // Sync slider and update scene info on dropdown change
 document.getElementById('sceneSelect').addEventListener('change', e => {
     const idx = +e.target.value;
     document.getElementById('timelineSlider').value = idx;
-    if (!document.querySelector('.character-card.active')) infoPanel.showScene(idx);
+    // Clear character selection
+    document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+    window.showFellowshipStartPositionsForCurrentScene();
+    infoPanel.showScene(idx);
 });
 
 // Deselect character and return to scene view on map background click
 document.getElementById('svgMap').addEventListener('click', e => {
-    if (!e.target.closest('circle')) {
-        document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
-        infoPanel.showScene(+document.getElementById('timelineSlider').value);
-    }
+    // Ignore clicks on character markers
+    if (e.target.closest('.character-marker')) return;
+    document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+    infoPanel.showScene(+document.getElementById('timelineSlider').value);
 });
