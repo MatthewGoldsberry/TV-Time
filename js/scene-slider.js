@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.showFellowshipStartPositionsForCurrentScene) {
             window.showFellowshipStartPositionsForCurrentScene();
         }
+        if (window.updateCharacterPathsForScene) {
+            window.updateCharacterPathsForScene(idx);
+        }
         if (window.infoPanel && window.infoPanel.showScene) {
             window.infoPanel.showScene(idx);
         }
@@ -93,6 +96,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isPlaying) return;
         isPlaying = true;
         setPlayBtnState(true);
+        // Clear any existing paths before starting
+        if (window.clearCharacterPaths) {
+            window.clearCharacterPaths();
+        }
         playInterval = setInterval(animateScenes, 1200); // 1.2s per scene
     }
 
@@ -103,6 +110,8 @@ document.addEventListener('DOMContentLoaded', function () {
             clearInterval(playInterval);
             playInterval = null;
         }
+        // Keep paths visible after animation stops
+        // User can manually interact with slider to clear
     }
 
     // Set initial icon
@@ -119,6 +128,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.infoPanel && window.infoPanel.showScene) {
                     window.infoPanel.showScene(0);
                 }
+                if (window.clearCharacterPaths) {
+                    window.clearCharacterPaths();
+                }
+            }
+            // Initialize path tracking with starting scene
+            if (window.updateCharacterPathsForScene) {
+                window.updateCharacterPathsForScene(parseInt(timelineSlider.value, 10));
             }
             startAnimation();
         }

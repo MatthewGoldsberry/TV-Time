@@ -29,6 +29,9 @@ function characterColor(name, alpha) {
     return rgb ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})` : `rgba(232,217,181,${alpha})`;
 }
 
+// Expose for use in other modules
+window.characterColor = characterColor;
+
 d3.csv('data/lotr_script_data.csv').then(data => {
     const characterStats = {};
     const characterData = {};
@@ -232,6 +235,10 @@ document.getElementById('timelineSlider').addEventListener('input', e => {
     document.getElementById('sceneSelect').value = idx;
     // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+    // Clear paths on manual scrubbing
+    if (window.clearCharacterPaths) {
+        window.clearCharacterPaths();
+    }
     window.showFellowshipStartPositionsForCurrentScene();
     infoPanel.showScene(idx);
 });
@@ -242,6 +249,10 @@ document.getElementById('sceneSelect').addEventListener('change', e => {
     document.getElementById('timelineSlider').value = idx;
     // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+    // Clear paths on manual scene selection
+    if (window.clearCharacterPaths) {
+        window.clearCharacterPaths();
+    }
     window.showFellowshipStartPositionsForCurrentScene();
     window.infoPanel.showScene(idx);
 });
