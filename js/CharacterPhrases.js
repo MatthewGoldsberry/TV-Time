@@ -230,6 +230,12 @@ class CharacterPhrases {
             )
             .text(d => d.text)
             .on('mouseover', (event, d) => {
+                d3.select(event.currentTarget)
+                    .style('fill', 'rgba(232,217,181,1.0)')
+                    .style('filter', 'url(#arc-glow)');
+                vis.chart.selectAll('.phrase-text')
+                    .filter(b => b.text !== d.text)
+                    .style('opacity', 0.68);
                 const excerpt = d.example && d.example.length > 140
                     ? d.example.slice(0, 140) + '…'
                     : d.example || '';
@@ -244,6 +250,12 @@ class CharacterPhrases {
                     .style('left', (event.pageX + 10) + 'px')
                     .style('top',  (event.pageY + 10) + 'px');
             })
-            .on('mouseout', () => vis.tooltip.style('display', 'none'));
+            .on('mouseout', (event, d) => {
+                d3.select(event.currentTarget)
+                    .style('fill', `rgba(232,217,181,${d.opacity})`)
+                    .style('filter', null);
+                vis.chart.selectAll('.phrase-text').style('opacity', 1);
+                vis.tooltip.style('display', 'none');
+            });
     }
 }
