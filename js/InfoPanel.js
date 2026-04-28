@@ -2,9 +2,6 @@
  * InfoPanel class definition; wrapper around all info displayed in character and scene info popover
  */
 
-// Scene names pulled from the dropdown so JS and HTML stay in sync
-const SCENE_NAMES = Array.from(document.querySelectorAll('#sceneSelect option')).map(o => o.textContent.trim());
-
 const FILM_NAMES = [ 'The Fellowship of the Ring', 'The Two Towers', 'The Return of the King'];
 
 // Tolkien Gateway URLs keyed by character name

@@ -5,6 +5,9 @@
 // class elements
 let infoPanel;
 let chordVis;
+let fellowshipLinesVis;
+
+const SCENE_NAMES = Array.from(document.querySelectorAll('#sceneSelect option')).map(o => o.textContent.trim());
 
 const FELLOWSHIP_ORDER = ['Frodo','Sam','Merry','Pippin','Gandalf','Aragorn','Legolas','Gimli','Boromir'];
 
@@ -142,6 +145,23 @@ d3.csv('data/lotr_script_data.csv').then(data => {
         { interactionMatrix, fellowshipOrder: FELLOWSHIP_ORDER }
     );
 
+    // Initialize fellowship lines bar chart in the viz panel
+    const fellowshipData = data.filter(d => FELLOWSHIP.has(d.character));
+    fellowshipLinesVis = new HorizontalBarChart(
+        {
+            parentElement: document.querySelector('.fellowship-lines-chart'),
+            dataMode: 'lines',
+            colorFn: d => characterColor(d.word, 0.75),
+            rowHeight: 40,
+            maxRows: 9,
+            noScrollClamp: true,
+            labelFontSize: '13px',
+            scoreFontSize: '11px',
+        },
+        fellowshipData,
+        null
+    );
+
 }).catch(err => console.error('Data load error:', err));
 
 
@@ -185,9 +205,48 @@ if (chordInfoIcon) {
     });
 }
 
-// Film filter dropdown for chord visualization
+// Fellowship Lines info icon tooltip
+const linesInfoIcon = document.querySelector('.lines-info-icon');
+if (linesInfoIcon) {
+    const getTooltip = () => document.getElementById('presence-tooltip');
+    linesInfoIcon.addEventListener('mouseover', e => {
+        const tip = getTooltip();
+        if (!tip) return;
+        tip.style.display = 'block';
+        tip.style.left = (e.pageX + 10) + 'px';
+        tip.style.top  = (e.pageY + 10) + 'px';
+        tip.innerHTML  = '<span class="pt-name">Fellowship Lines</span>'
+            + 'Each <strong>bar</strong> shows the total number of spoken dialogue lines for that Fellowship member across the selected film(s). '
+            + 'One line = one uninterrupted turn of speech in the screenplay.';
+    });
+    linesInfoIcon.addEventListener('mousemove', e => {
+        const tip = getTooltip();
+        if (!tip) return;
+        tip.style.left = (e.pageX + 10) + 'px';
+        tip.style.top  = (e.pageY + 10) + 'px';
+    });
+    linesInfoIcon.addEventListener('mouseout', () => {
+        const tip = getTooltip();
+        if (tip) tip.style.display = 'none';
+    });
+}
+
+// Film filter dropdown - updates whichever viz is currently active
 document.querySelector('.chord-film-select').addEventListener('change', e => {
     chordVis.updateVis(e.target.value);
+    if (fellowshipLinesVis) fellowshipLinesVis.updateVis(e.target.value);
+});
+
+// Viz panel tab toggle
+document.querySelectorAll('.viz-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.viz-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const isChord = tab.dataset.tab === 'chord';
+        document.querySelector('.chord-container').style.display = isChord ? '' : 'none';
+        document.querySelector('.fellowship-lines-container').classList.toggle('active', !isChord);
+        if (!isChord && fellowshipLinesVis) fellowshipLinesVis.resize();
+    });
 });
 
 // Toggle character view when a fellowship card is clicked; re-click deselects
