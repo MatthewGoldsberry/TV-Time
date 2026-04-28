@@ -2,8 +2,8 @@
  * Load data from CSV files and initialize visualizations and handlers
  */
 
-// class elements
-let infoPanel;
+// class elements (expose infoPanel to window for scene-slider.js access)
+window.infoPanel = null;
 let chordVis;
 
 const FELLOWSHIP_ORDER = ['Frodo','Sam','Merry','Pippin','Gandalf','Aragorn','Legolas','Gimli','Boromir'];
@@ -28,6 +28,9 @@ function characterColor(name, alpha) {
     const rgb = CHARACTER_COLORS[name];
     return rgb ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})` : `rgba(232,217,181,${alpha})`;
 }
+
+// Expose for use in other modules
+window.characterColor = characterColor;
 
 d3.csv('data/lotr_script_data.csv').then(data => {
     const characterStats = {};
@@ -130,11 +133,11 @@ d3.csv('data/lotr_script_data.csv').then(data => {
     });
 
     // Initialize the InfoPanel
-    infoPanel = new InfoPanel(
+    window.infoPanel = new InfoPanel(
         { characterStats, sceneStats, characterData, corpusWordFreq, corpusNgramFreq, SCENE_INDEX },
         data
     );
-    infoPanel.showScene(0);
+    window.infoPanel.showScene(0);
 
     // Initialize chord diagram in the viz panel
     chordVis = new CharacterChord(
@@ -198,9 +201,9 @@ document.querySelectorAll('.character-card').forEach(card => {
         document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
         if (!isActive) {
             e.currentTarget.classList.add('active');
-            infoPanel.showCharacter(name);
+            window.infoPanel.showCharacter(name);
         } else {
-            infoPanel.showScene(+document.getElementById('timelineSlider').value);
+            window.infoPanel.showScene(+document.getElementById('timelineSlider').value);
         }
     });
 });
@@ -217,9 +220,9 @@ document.getElementById('svgMap').addEventListener('click', e => {
         document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
         if (card && !isActive) {
             card.classList.add('active');
-            infoPanel.showCharacter(name);
+            window.infoPanel.showCharacter(name);
         } else {
-            infoPanel.showScene(+document.getElementById('timelineSlider').value);
+            window.infoPanel.showScene(+document.getElementById('timelineSlider').value);
         }
         // Prevent map click handler from immediately deselecting
         e.stopPropagation();
@@ -232,6 +235,10 @@ document.getElementById('timelineSlider').addEventListener('input', e => {
     document.getElementById('sceneSelect').value = idx;
     // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+    // Clear paths on manual scrubbing
+    if (window.clearCharacterPaths) {
+        window.clearCharacterPaths();
+    }
     window.showFellowshipStartPositionsForCurrentScene();
     infoPanel.showScene(idx);
 });
@@ -242,8 +249,12 @@ document.getElementById('sceneSelect').addEventListener('change', e => {
     document.getElementById('timelineSlider').value = idx;
     // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
+    // Clear paths on manual scene selection
+    if (window.clearCharacterPaths) {
+        window.clearCharacterPaths();
+    }
     window.showFellowshipStartPositionsForCurrentScene();
-    infoPanel.showScene(idx);
+    window.infoPanel.showScene(idx);
 });
 
 // Deselect character and return to scene view on map background click
@@ -251,5 +262,5 @@ document.getElementById('svgMap').addEventListener('click', e => {
     // Ignore clicks on character markers
     if (e.target.closest('.character-marker')) return;
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
-    infoPanel.showScene(+document.getElementById('timelineSlider').value);
+    window.infoPanel.showScene(+document.getElementById('timelineSlider').value);
 });
