@@ -1694,6 +1694,27 @@ body:has(#overview-toggle:checked) .overview-icon {
     stroke-width: 2;
 }
 
+/* --- Character Path Hover Emphasis --- */
+
+.character-path,
+.character-path-outline {
+    transition: opacity 0.15s, stroke-width 0.15s;
+}
+
+.character-path.path-highlighted {
+    stroke-width: 5;
+    opacity: 1;
+}
+
+.character-path-outline.path-highlighted {
+    opacity: 1;
+}
+
+.character-path.path-dimmed,
+.character-path-outline.path-dimmed {
+    opacity: 0.12;
+}
+
 /* --- Map Character Marker Hover Effect --- */
 svg .character-marker {
     cursor: pointer;

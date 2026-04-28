@@ -271,6 +271,29 @@ document.querySelectorAll('.character-card').forEach(card => {
 });
 
 
+// Emphasize the hovered character's path; dim all others
+document.getElementById('svgMap').addEventListener('mouseover', e => {
+    const marker = e.target.closest('.character-marker');
+    if (!marker) return;
+    const name = marker.getAttribute('data-character');
+    d3.selectAll('.character-path, .character-path-outline')
+        .classed('path-dimmed', true)
+        .classed('path-highlighted', false);
+    d3.selectAll(`.character-path[data-character="${name}"], .character-path-outline[data-character="${name}"]`)
+        .classed('path-dimmed', false)
+        .classed('path-highlighted', true);
+});
+
+// Restore all paths when the pointer leaves a marker
+document.getElementById('svgMap').addEventListener('mouseout', e => {
+    const marker = e.target.closest('.character-marker');
+    if (!marker) return;
+    if (marker.contains(e.relatedTarget)) return;
+    d3.selectAll('.character-path, .character-path-outline')
+        .classed('path-dimmed', false)
+        .classed('path-highlighted', false);
+});
+
 // Toggle fellowship card and info panel when a character marker is clicked
 document.getElementById('svgMap').addEventListener('click', e => {
     const marker = e.target.closest('.character-marker');
