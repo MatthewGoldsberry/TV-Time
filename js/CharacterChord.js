@@ -33,7 +33,7 @@ class CharacterChord {
         const w = bbox.width  || 400;
         const h = bbox.height || 400;
 
-        vis.outerRadius = Math.min(w, h) * 0.36; // drives arc size
+        vis.outerRadius = Math.min(w, h) * 0.40; // drives arc size
         vis.innerRadius = vis.outerRadius * 0.80; // where ribbons attach
         vis.labelRadius = vis.outerRadius + 14; // text placement location
 
@@ -42,7 +42,7 @@ class CharacterChord {
             .append('svg')
             .attr('width',  '100%')
             .attr('height', '100%')
-            .attr('viewBox', `${-w / 2} ${-h / 2 + 18} ${w} ${h}`)
+            .attr('viewBox', `${-w / 2} ${-h / 2 + 6} ${w} ${h}`)
             .attr('preserveAspectRatio', 'xMidYMid meet');
 
         // Background click clears all selections
