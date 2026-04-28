@@ -1635,6 +1635,65 @@ body:has(#overview-toggle:checked) .overview-icon {
     box-shadow: 0 4px 16px rgba(0,0,0,0.35);
 }
 
+/* --- ScenePlayer Dialogue Boxes --- */
+
+.dialogue-box-bg {
+    fill: rgba(10, 10, 10, 0.5);
+    stroke: rgba(232, 217, 181, 0.3);
+    stroke-width: 1;
+    filter: url(#dialogue-drop-shadow);
+}
+
+.dialogue-char-name {
+    text-anchor: middle;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: bold;
+    fill: rgba(232, 217, 181, 0.95);
+}
+
+.dialogue-text {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    fill: rgba(232, 217, 181, 0.85);
+}
+
+.dialogue-arrow {
+    fill: rgba(10, 10, 10, 0.5);
+    stroke: rgba(232, 217, 181, 0.3);
+    stroke-width: 1;
+}
+
+.narration-box-bg {
+    fill: rgba(6, 6, 6, 0.72);
+    stroke: rgba(232, 217, 181, 0.55);
+    stroke-width: 1.5;
+    filter: url(#dialogue-drop-shadow);
+}
+
+.narration-char-name {
+    text-anchor: middle;
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: bold;
+    fill: rgba(232, 217, 181, 0.95);
+    letter-spacing: 2px;
+}
+
+.narration-text {
+    text-anchor: middle;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-style: italic;
+    fill: rgba(232, 217, 181, 0.82);
+}
+
+.misc-dialogue-marker {
+    fill: rgba(200, 150, 100, 0.7);
+    stroke: rgba(232, 217, 181, 0.9);
+    stroke-width: 2;
+}
+
 /* --- Map Character Marker Hover Effect --- */
 svg .character-marker {
     cursor: pointer;
