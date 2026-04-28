@@ -96,22 +96,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isPlaying) return;
         isPlaying = true;
         setPlayBtnState(true);
-        // Clear any existing paths before starting
-        if (window.clearCharacterPaths) {
-            window.clearCharacterPaths();
-        }
+        window.scenePlayer?.setTimelineActive(true);
+        if (window.clearCharacterPaths) window.clearCharacterPaths();
         playInterval = setInterval(animateScenes, 1200); // 1.2s per scene
     }
 
     function stopAnimation() {
         isPlaying = false;
         setPlayBtnState(false);
+        window.scenePlayer?.setTimelineActive(false);
         if (playInterval) {
             clearInterval(playInterval);
             playInterval = null;
         }
-        // Keep paths visible after animation stops
-        // User can manually interact with slider to clear
     }
 
     // Set initial icon
