@@ -146,16 +146,34 @@ class CharacterPresence {
             .attr('stroke', 'rgba(232,217,181,0.18)')
             .attr('stroke-width', 0.6)
             .on('mouseover', (event, d) => {
+                d3.select(event.currentTarget)
+                    .attr('stroke', 'rgba(232,217,181,0.95)')
+                    .attr('stroke-width', '2.5')
+                    .style('filter', 'url(#arc-glow)');
+                vis.chart.selectAll('.presence-cell')
+                    .filter(b => b !== d)
+                    .style('opacity', 0.68);
                 vis.tooltip
                     .style('display', 'block')
                     .style('left', (event.pageX + 10) + 'px')
                     .style('top',  (event.pageY + 10) + 'px')
-                    // Show "Not present" for empty cells so every hover gives feedback
                     .html(d.count
                         ? `<span class="pt-name">${d.sceneName}</span>${d.count} line${d.count !== 1 ? 's' : ''}`
                         : `<span class="pt-name">${d.sceneName}</span>Not present`
                     );
             })
-            .on('mouseout', () => vis.tooltip.style('display', 'none'));
+            .on('mousemove', event => {
+                vis.tooltip
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top',  (event.pageY + 10) + 'px');
+            })
+            .on('mouseout', event => {
+                d3.select(event.currentTarget)
+                    .attr('stroke', 'rgba(232,217,181,0.18)')
+                    .attr('stroke-width', '0.6')
+                    .style('filter', null);
+                vis.chart.selectAll('.presence-cell').style('opacity', 1);
+                vis.tooltip.style('display', 'none');
+            });
     }
 }

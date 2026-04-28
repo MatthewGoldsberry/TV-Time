@@ -12,13 +12,16 @@ class HorizontalBarChart {
      */
     constructor(_config, _data, _corpusWordFreq) {
         this.config = {
-            parentElement:  _config.parentElement,
+            parentElement: _config.parentElement,
             containerWidth: 420,
-            rowHeight:  _config.rowHeight ?? 22,
+            rowHeight: _config.rowHeight ?? 22,
             margin: { top: 6, right: 52, bottom: 6, left: 95 },
-            colorFn:  _config.colorFn  || null,
-            maxRows:  _config.maxRows  ?? 10,
+            colorFn: _config.colorFn || null,
+            maxRows: _config.maxRows ?? 10,
             dataMode: _config.dataMode || 'words',  // 'words' | 'lines'
+            noScrollClamp: _config.noScrollClamp ?? false,
+            labelFontSize: _config.labelFontSize || '9px',
+            scoreFontSize: _config.scoreFontSize || '8px',
         };
         this.data = _data;
         this.corpusWordFreq = _corpusWordFreq;
@@ -51,6 +54,8 @@ class HorizontalBarChart {
         // Y-axis group
         vis.yAxisG = vis.chart.append('g').attr('class', 'words-y-axis');
 
+        vis.tooltip = d3.select('#presence-tooltip');
+
         vis.updateVis();
     }
 
@@ -65,9 +70,12 @@ class HorizontalBarChart {
         if (scoreMode !== undefined) vis.scoreMode = scoreMode;
 
         if (vis.config.dataMode === 'lines') {
-            // Count dialogue lines per character
+            // Scene filter logic
+            const filtered = vis.film === 'all'
+                ? vis.data
+                : vis.data.filter(d => d.film === vis.film);
             const counts = {};
-            vis.data.forEach(r => { counts[r.character] = (counts[r.character] || 0) + 1; });
+            filtered.forEach(r => { counts[r.character] = (counts[r.character] || 0) + 1; });
             vis.words = Object.entries(counts)
                 .map(([name, n]) => ({ word: name, score: n }))
                 .sort((a, b) => b.score - a.score);
@@ -113,6 +121,7 @@ class HorizontalBarChart {
      */
     _syncScrollHeight() {
         let vis = this;
+        if (vis.config.noScrollClamp) return;
         const containerW = vis.config.parentElement.getBoundingClientRect().width;
         if (!containerW) return;
 
@@ -123,6 +132,28 @@ class HorizontalBarChart {
 
         const visibleRows = Math.min(vis.config.maxRows, vis.words.length);
         vis.config.parentElement.style.height = Math.round(visibleRows * rowPx + marginPx) + 'px';
+    }
+
+    /**
+     * Measures available space from the DOM and recomputes rowHeight to fill it, then re-renders for viz panel.
+     * Could not get this to work with the CSS so this was "hard code" and wrapped in method for use.
+     */
+    resize() {
+        let vis = this;
+        const outer = vis.config.parentElement.parentElement;
+        const chart = vis.config.parentElement;
+        const outerStyle = getComputedStyle(outer);
+        const chartStyle = getComputedStyle(chart);
+        const outerPadV = parseFloat(outerStyle.paddingTop)  + parseFloat(outerStyle.paddingBottom);
+        const outerPadH = parseFloat(outerStyle.paddingLeft) + parseFloat(outerStyle.paddingRight);
+        const chartPadV = parseFloat(chartStyle.paddingTop) + parseFloat(chartStyle.paddingBottom);
+        const chartPadH = parseFloat(chartStyle.paddingLeft) + parseFloat(chartStyle.paddingRight);
+        const svgH = outer.getBoundingClientRect().height - outerPadV - chartPadV;
+        const svgW = outer.getBoundingClientRect().width  - outerPadH - chartPadH;
+        const scale = svgW / vis.config.containerWidth;
+        const marginV = vis.config.margin.top + vis.config.margin.bottom;
+        vis.config.rowHeight = Math.max((svgH / scale - marginV) / vis.config.maxRows, 15);
+        vis.updateVis();
     }
 
     /**
@@ -141,6 +172,40 @@ class HorizontalBarChart {
             .attr('x', 0)
             .attr('rx', 2)
             .attr('fill', d => vis.config.colorFn ? vis.config.colorFn(d) : 'rgba(232,217,181,0.55)')
+            .on('mouseover', (event, d) => {
+                d3.select(event.currentTarget)
+                    .attr('stroke', 'rgba(232,217,181,0.95)')
+                    .attr('stroke-width', '2.5')
+                    .style('filter', 'url(#arc-glow)');
+                vis.chart.selectAll('.word-bar')
+                    .filter(b => b.word !== d.word)
+                    .style('opacity', 0.68);
+                const scoreLabel = vis.config.dataMode === 'lines'
+                    ? `${d.score} lines of dialogue`
+                    : vis.scoreMode === 'unique'
+                        ? `${d.score.toFixed(1)}% distinctiveness`
+                        : vis.scoreMode === 'rate'
+                            ? `${d.score.toFixed(1)}% usage rate`
+                            : `${d.score} occurrences`;
+                vis.tooltip
+                    .style('display', 'block')
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top',  (event.pageY + 10) + 'px')
+                    .html(`<span class="pt-name">${d.word}</span>${scoreLabel}`);
+            })
+            .on('mousemove', event => {
+                vis.tooltip
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top',  (event.pageY + 10) + 'px');
+            })
+            .on('mouseout', event => {
+                d3.select(event.currentTarget)
+                    .attr('stroke', null)
+                    .attr('stroke-width', null)
+                    .style('filter', null);
+                vis.chart.selectAll('.word-bar').style('opacity', 1);
+                vis.tooltip.style('display', 'none');
+            })
             .transition().duration(280)
             .attr('width', d => vis.xScale(d.score));
 
@@ -153,7 +218,7 @@ class HorizontalBarChart {
             .attr('dominant-baseline', 'middle')
             .attr('fill', 'rgba(232,217,181,0.45)')
             .style('font-family', 'Cinzel, serif')
-            .style('font-size', '8px')
+            .style('font-size', vis.config.scoreFontSize)
             .transition().duration(280)
             .attr('x', d => vis.xScale(d.score) + 5)
             .text(d => vis.scoreMode === 'freq' ? d.score : `${d.score.toFixed(1)}%`);
@@ -166,7 +231,7 @@ class HorizontalBarChart {
             .attr('x', -8)
             .attr('fill', 'rgba(232,217,181,0.8)')
             .style('font-family', 'Cinzel, serif')
-            .style('font-size', '9px')
+            .style('font-size', vis.config.labelFontSize)
             .style('text-anchor', 'end');
     }
 }
