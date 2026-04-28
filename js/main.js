@@ -11,6 +11,9 @@ const FELLOWSHIP_ORDER = ['Frodo','Sam','Merry','Pippin','Gandalf','Aragorn','Le
 // Derived Set for membership tests
 const FELLOWSHIP = new Set(FELLOWSHIP_ORDER);
 
+// Expose FELLOWSHIP to window for ScenePlayer access
+window.FELLOWSHIP = FELLOWSHIP;
+
 // Base RGB per character
 const CHARACTER_COLORS = {
     'Frodo':   [158,  32,  62],
