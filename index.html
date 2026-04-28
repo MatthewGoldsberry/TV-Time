@@ -36,7 +36,10 @@
     <!-- Visualization panel; containing general data visualizations -->
     <aside class="viz-panel">
         <div class="viz-header">
-            <h2 class="panel-title">Scene Co-occurrence <span class="presence-info-icon chord-info-icon">&#x2139;</span></h2>
+            <div class="viz-tabs">
+                <button class="viz-tab active" data-tab="chord">Scene<br>Co-occurrence <span class="presence-info-icon chord-info-icon">&#x2139;</span></button>
+                <button class="viz-tab" data-tab="lines">Fellowship<br>Lines <span class="presence-info-icon lines-info-icon">&#x2139;</span></button>
+            </div>
             <select class="chord-film-select">
                 <option value="all">All Films</option>
                 <option value="The Fellowship of the Ring">The Fellowship of the Ring</option>
@@ -47,6 +50,10 @@
             <div class="viz-content">
                 <div class="chord-container">
                     <button class="chord-clear-btn">Clear Selection</button>
+                </div>
+                <div class="fellowship-lines-container">
+                    <div class="fellowship-lines-chart"></div>
+                </div>
         </div>
     </aside>
 
