@@ -314,14 +314,17 @@ document.getElementById('svgMap').addEventListener('click', e => {
     }
 });
 
+// Global flag read by SceneSlider.js animation loop and path-building calls
+window.showPaths = true;
+
 // Sync dropdown and update scene info on slider move
 document.getElementById('timelineSlider').addEventListener('input', e => {
     const idx = +e.target.value;
     document.getElementById('sceneSelect').value = idx;
-    // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
-    // Clear paths on manual scrubbing
-    if (window.clearCharacterPaths) {
+    if (window.showPaths) {
+        window.buildPathsUpToScene(idx);
+    } else {
         window.clearCharacterPaths();
     }
     window.showFellowshipStartPositionsForCurrentScene();
@@ -332,14 +335,24 @@ document.getElementById('timelineSlider').addEventListener('input', e => {
 document.getElementById('sceneSelect').addEventListener('change', e => {
     const idx = +e.target.value;
     document.getElementById('timelineSlider').value = idx;
-    // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
-    // Clear paths on manual scene selection
-    if (window.clearCharacterPaths) {
+    if (window.showPaths) {
+        window.buildPathsUpToScene(idx);
+    } else {
         window.clearCharacterPaths();
     }
     window.showFellowshipStartPositionsForCurrentScene();
     window.infoPanel.showScene(idx);
+});
+
+// Show/hide paths toggle
+document.getElementById('showPathsToggle').addEventListener('change', e => {
+    window.showPaths = e.target.checked;
+    if (window.showPaths) {
+        window.buildPathsUpToScene(+document.getElementById('timelineSlider').value);
+    } else {
+        window.clearCharacterPaths();
+    }
 });
 
 // Deselect character and return to scene view on map background click

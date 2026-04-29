@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.showFellowshipStartPositionsForCurrentScene) {
             window.showFellowshipStartPositionsForCurrentScene();
         }
-        if (window.updateCharacterPathsForScene) {
+        if (window.showPaths && window.updateCharacterPathsForScene) {
             window.updateCharacterPathsForScene(idx);
         }
         if (window.infoPanel && window.infoPanel.showScene) {
