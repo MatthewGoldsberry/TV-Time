@@ -23,7 +23,7 @@ const CHARACTER_COLORS = {
     'Sam':     [125,  72,  32],
     'Merry':   [172,  82,  28],
     'Pippin':  [192, 142,   8],
-    'Gandalf': [161, 161, 161],
+    'Gandalf': [200, 200, 200],
     'Aragorn': [ 42, 122,  52],
     'Legolas': [128,  48, 168],
     'Gimli':   [ 88,  78,  68],
