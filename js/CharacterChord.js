@@ -1,6 +1,6 @@
 /**
  * CharacterChord - chord diagram showing fellowship scene co-occurrence.
- * Arc size = total shared scenes for a character; ribbon weight = shared scenes between a pair.
+ * Arc size = co-occurrence weight (total shared-scene connections); ribbon weight = shared scenes between a pair.
  */
 
 // Derived from CHARACTER_COLORS in main.js — same RGB base, chord-specific alpha
@@ -15,6 +15,7 @@ class CharacterChord {
     constructor(_config, _data) {
         this.config = { parentElement: _config.parentElement };
         this.interactionMatrix = _data.interactionMatrix;
+        this.sceneCounts = _data.sceneCounts;
         this.fellowshipOrder = _data.fellowshipOrder;
         this.film = 'all';
         this.selectedIndices = new Set();
@@ -305,7 +306,7 @@ class CharacterChord {
                     .style('display', 'block')
                     .style('left', (event.pageX + 10) + 'px')
                     .style('top',  (event.pageY + 10) + 'px')
-                    .html(`<span class="pt-name">${vis.activeOrder[d.index]}</span>${d.value} total scene appearances`);
+                    .html(`<span class="pt-name">${vis.activeOrder[d.index]}</span>${vis.sceneCounts?.[vis.film]?.[vis.activeOrder[d.index]] ?? d.value} scenes with dialogue`);
             })
             .on('mousemove', event => {
                 vis.tooltip

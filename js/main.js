@@ -390,7 +390,7 @@ d3.csv('data/lotr_script_data.csv').then(data => {
         delete s.scenes;
     });
 
-    // Build fellowship interaction matrix from scene character sets
+    // Build fellowship interaction matrix and per-film scene-presence counts
     const makeMatrix = () => FELLOWSHIP_ORDER.map(() => FELLOWSHIP_ORDER.map(() => 0));
     const interactionMatrix = {
         all: makeMatrix(),
@@ -398,11 +398,19 @@ d3.csv('data/lotr_script_data.csv').then(data => {
         'The Two Towers': makeMatrix(),
         'The Return of the King': makeMatrix(),
     };
+    const FILM_KEYS = ['all', 'The Fellowship of the Ring', 'The Two Towers', 'The Return of the King'];
+    const sceneCounts = Object.fromEntries(
+        FILM_KEYS.map(f => [f, Object.fromEntries(FELLOWSHIP_ORDER.map(n => [n, 0]))])
+    );
     Object.entries(sceneStats).forEach(([scene, stats]) => {
         const film = sceneFilm[scene];
         const indices = [...stats.characters]
             .map(c => FELLOWSHIP_ORDER.indexOf(c))
             .filter(i => i >= 0);
+        indices.forEach(i => {
+            sceneCounts.all[FELLOWSHIP_ORDER[i]]++;
+            if (film) sceneCounts[film][FELLOWSHIP_ORDER[i]]++;
+        });
         for (let a = 0; a < indices.length; a++) {
             for (let b = a + 1; b < indices.length; b++) {
                 const [i, j] = [indices[a], indices[b]];
@@ -439,7 +447,7 @@ d3.csv('data/lotr_script_data.csv').then(data => {
     // Initialize chord diagram in the viz panel
     chordVis = new CharacterChord(
         { parentElement: document.querySelector('.chord-container') },
-        { interactionMatrix, fellowshipOrder: FELLOWSHIP_ORDER }
+        { interactionMatrix, fellowshipOrder: FELLOWSHIP_ORDER, sceneCounts }
     );
 
     // Initialize fellowship lines bar chart in the viz panel
