@@ -948,7 +948,7 @@ body:has(#overview-toggle:checked) .overview-icon {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: var(--gap-xs) 0;
+    padding: 2px 0;
     border-bottom: var(--border);
 }
 
@@ -1231,7 +1231,7 @@ body:has(#overview-toggle:checked) .overview-icon {
 .scene-info {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-xs);
+    gap: 2px;
     padding: var(--gap-xs) 0;
     height: 100%;
     box-sizing: border-box;
@@ -1254,7 +1254,7 @@ body:has(#overview-toggle:checked) .overview-icon {
     letter-spacing: 0.07em;
     color: rgba(232, 217, 181, 0.4);
     text-align: center;
-    margin: 0 0 var(--gap-xs);
+    margin: 0;
     font-style: italic;
 }
 
@@ -1301,7 +1301,6 @@ body:has(#overview-toggle:checked) .overview-icon {
     display: block;
     border-radius: var(--panel-radius);
     opacity: 0.82;
-    margin-top: var(--gap-xs);
 }
 
 .scene-transcript {
@@ -1354,7 +1353,7 @@ body:has(#overview-toggle:checked) .overview-icon {
     color: rgba(232, 217, 181, 0.45);
     text-align: center;
     margin: auto 0 0;
-    padding-top: var(--gap-sm);
+    padding-top: var(--gap-xs);
     cursor: pointer;
     background: none;
     border: none;
