@@ -1264,6 +1264,10 @@ body:has(#overview-toggle:checked) .overview-icon {
     gap: 0;
 }
 
+.info-panel.expanded .scene-thumb {
+    display: none;
+}
+
 .info-panel.expanded .scene-stats {
     flex-direction: row;
     gap: var(--gap-xl);
