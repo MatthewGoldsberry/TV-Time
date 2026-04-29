@@ -271,6 +271,29 @@ document.querySelectorAll('.character-card').forEach(card => {
 });
 
 
+// Emphasize the hovered character's path; dim all others
+document.getElementById('svgMap').addEventListener('mouseover', e => {
+    const marker = e.target.closest('.character-marker');
+    if (!marker) return;
+    const name = marker.getAttribute('data-character');
+    d3.selectAll('.character-path, .character-path-outline')
+        .classed('path-dimmed', true)
+        .classed('path-highlighted', false);
+    d3.selectAll(`.character-path[data-character="${name}"], .character-path-outline[data-character="${name}"]`)
+        .classed('path-dimmed', false)
+        .classed('path-highlighted', true);
+});
+
+// Restore all paths when the pointer leaves a marker
+document.getElementById('svgMap').addEventListener('mouseout', e => {
+    const marker = e.target.closest('.character-marker');
+    if (!marker) return;
+    if (marker.contains(e.relatedTarget)) return;
+    d3.selectAll('.character-path, .character-path-outline')
+        .classed('path-dimmed', false)
+        .classed('path-highlighted', false);
+});
+
 // Toggle fellowship card and info panel when a character marker is clicked
 document.getElementById('svgMap').addEventListener('click', e => {
     const marker = e.target.closest('.character-marker');
@@ -291,14 +314,17 @@ document.getElementById('svgMap').addEventListener('click', e => {
     }
 });
 
+// Global flag read by SceneSlider.js animation loop and path-building calls
+window.showPaths = true;
+
 // Sync dropdown and update scene info on slider move
 document.getElementById('timelineSlider').addEventListener('input', e => {
     const idx = +e.target.value;
     document.getElementById('sceneSelect').value = idx;
-    // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
-    // Clear paths on manual scrubbing
-    if (window.clearCharacterPaths) {
+    if (window.showPaths) {
+        window.buildPathsUpToScene(idx);
+    } else {
         window.clearCharacterPaths();
     }
     window.showFellowshipStartPositionsForCurrentScene();
@@ -309,14 +335,24 @@ document.getElementById('timelineSlider').addEventListener('input', e => {
 document.getElementById('sceneSelect').addEventListener('change', e => {
     const idx = +e.target.value;
     document.getElementById('timelineSlider').value = idx;
-    // Clear character selection
     document.querySelectorAll('.character-card').forEach(c => c.classList.remove('active'));
-    // Clear paths on manual scene selection
-    if (window.clearCharacterPaths) {
+    if (window.showPaths) {
+        window.buildPathsUpToScene(idx);
+    } else {
         window.clearCharacterPaths();
     }
     window.showFellowshipStartPositionsForCurrentScene();
     window.infoPanel.showScene(idx);
+});
+
+// Show/hide paths toggle
+document.getElementById('showPathsToggle').addEventListener('change', e => {
+    window.showPaths = e.target.checked;
+    if (window.showPaths) {
+        window.buildPathsUpToScene(+document.getElementById('timelineSlider').value);
+    } else {
+        window.clearCharacterPaths();
+    }
 });
 
 // Deselect character and return to scene view on map background click

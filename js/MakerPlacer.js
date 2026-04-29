@@ -119,6 +119,9 @@ function placeMarkersOnMap(svgSelector = '#svgMap') {
             .filter(d => !isNaN(d.cx) && !isNaN(d.cy));
 
         updateMarkersForCurrentScene(svgSelector);
+
+        // Build initial path state for scene 0 (empty for Prologue, but consistent)
+        buildPathsUpToScene(0);
     }).catch(err => {
         console.error('Error loading marker data:', err);
     });
@@ -149,79 +152,90 @@ function clearCharacterPaths() {
     svg.selectAll('.character-path, .character-path-outline').remove();
 }
 
-// Draw path lines for all characters
+// Draw path lines for all characters, forming side-by-side bands on shared segments
 function drawCharacterPaths(svgSelector = '#svgMap') {
     const svg = d3.select(svgSelector);
     if (svg.empty()) return;
-    
-    // Remove existing paths
+
     svg.selectAll('.character-path, .character-path-outline').remove();
-    
+
     // Create a group for paths (insert before markers)
     let pathGroup = svg.select('.path-group');
     if (pathGroup.empty()) {
-        pathGroup = svg.insert('g', '.character-marker')
-            .attr('class', 'path-group');
+        pathGroup = svg.insert('g', '.character-marker').attr('class', 'path-group');
     }
-    
-    // Calculate offsets for overlapping paths
-    const pathsWithOffsets = calculatePathOffsets(_characterPaths);
-    
-    // Draw paths with outlines for visibility
-    pathsWithOffsets.forEach(({ character, positions, offset }) => {
-        if (positions.length < 2) return; // Need at least 2 points for a line
-        
-        // Apply offset to positions if needed
-        const offsetPositions = positions.map((pos, i) => {
-            if (offset === 0) return pos;
-            
-            // Calculate perpendicular offset direction
-            let dx = 0, dy = 0;
-            if (i < positions.length - 1) {
-                // Use direction to next point
-                dx = positions[i + 1].cx - pos.cx;
-                dy = positions[i + 1].cy - pos.cy;
-            } else if (i > 0) {
-                // Use direction from previous point
-                dx = pos.cx - positions[i - 1].cx;
-                dy = pos.cy - positions[i - 1].cy;
-            }
-            
-            // Normalize and create perpendicular offset
-            const length = Math.sqrt(dx * dx + dy * dy);
-            if (length > 0) {
-                const perpX = -dy / length * offset;
-                const perpY = dx / length * offset;
-                return { cx: pos.cx + perpX, cy: pos.cy + perpY, sceneIndex: pos.sceneIndex };
-            }
-            return pos;
+
+    const bandWidth = 5;
+    const tolerance = 5;
+
+    // Build segment to [characters] map
+    const segmentGroups = {};
+    Object.entries(_characterPaths).forEach(([character, positions]) => {
+        for (let i = 0; i < positions.length - 1; i++) {
+            const key = segmentKey(positions[i], positions[i + 1], tolerance);
+            if (!segmentGroups[key]) segmentGroups[key] = [];
+            if (!segmentGroups[key].includes(character)) segmentGroups[key].push(character);
+        }
+    });
+    Object.values(segmentGroups).forEach(g => g.sort());
+
+    // Apply offset to positions if needed
+    const offsetPathMap = {};
+    Object.entries(_characterPaths).forEach(([character, positions]) => {
+        if (positions.length < 2) return;
+
+        const acc = positions.map(() => ({ ox: 0, oy: 0, n: 0 }));
+
+        for (let i = 0; i < positions.length - 1; i++) {
+            const key = segmentKey(positions[i], positions[i + 1], tolerance);
+            const group = segmentGroups[key];
+            if (!group || group.length < 2) continue;
+
+            const myIndex = group.indexOf(character);
+            const dx = positions[i + 1].cx - positions[i].cx;
+            const dy = positions[i + 1].cy - positions[i].cy;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            if (len === 0) continue;
+
+            // Offset perpendicular units centered on the bundle midpoint
+            const perpX = -dy / len;
+            const perpY =  dx / len;
+            const offset = (myIndex - (group.length - 1) / 2) * bandWidth;
+
+            // Accumulate on both endpoints
+            acc[i].ox += perpX * offset; acc[i].oy += perpY * offset; acc[i].n++;
+            acc[i + 1].ox += perpX * offset; acc[i + 1].oy += perpY * offset; acc[i + 1].n++;
+        }
+
+        offsetPathMap[character] = positions.map((pos, i) => {
+            const { ox, oy, n } = acc[i];
+            return n > 0
+                ? { cx: pos.cx + ox / n, cy: pos.cy + oy / n, sceneIndex: pos.sceneIndex }
+                : pos;
         });
-        
-        // Get character color with higher vibrancy
+    });
+
+    const lineGenerator = d3.line()
+        .x(d => d.cx)
+        .y(d => d.cy)
+        .curve(d3.curveCatmullRom.alpha(0.5));
+
+    Object.entries(offsetPathMap).forEach(([character, positions]) => {
         const color = window.characterColor ? window.characterColor(character, 0.95) : 'rgba(232,217,181,0.95)';
-        
-        // Create line generator
-        const lineGenerator = d3.line()
-            .x(d => d.cx)
-            .y(d => d.cy)
-            .curve(d3.curveCatmullRom.alpha(0.5));
-        
-        // Draw black outline first
+
+        // Outline drawn first so it sits beneath the colored stroke
         pathGroup.append('path')
-            .datum(offsetPositions)
+            .datum(positions)
             .attr('class', 'character-path-outline')
             .attr('d', lineGenerator)
-            //.attr('stroke', '#000')
-            //.attr('stroke-width', 5)
             .attr('fill', 'none')
             .attr('stroke-linecap', 'round')
             .attr('stroke-linejoin', 'round')
             .attr('opacity', 0.7)
             .attr('data-character', character);
-        
-        // Draw colored path on top
+
         pathGroup.append('path')
-            .datum(offsetPositions)
+            .datum(positions)
             .attr('class', 'character-path')
             .attr('d', lineGenerator)
             .attr('stroke', color)
@@ -234,73 +248,10 @@ function drawCharacterPaths(svgSelector = '#svgMap') {
     });
 }
 
-// Calculate offsets for overlapping paths to place them side-by-side
-function calculatePathOffsets(characterPaths) {
-    const pathsArray = Object.entries(characterPaths).map(([character, positions]) => ({
-        character,
-        positions
-    }));
-    
-    // Simple offset assignment: if paths share many points, offset them
-    const offsetMap = {};
-    const offsetAmount = 6; // pixels to offset
-    let currentOffset = 0;
-    
-    // Group characters by shared path segments
-    const groups = [];
-    pathsArray.forEach(pathData => {
-        let foundGroup = false;
-        for (const group of groups) {
-            // Check if this path shares positions with any in the group
-            if (pathsSharePositions(pathData.positions, group[0].positions)) {
-                group.push(pathData);
-                foundGroup = true;
-                break;
-            }
-        }
-        if (!foundGroup) {
-            groups.push([pathData]);
-        }
-    });
-    
-    // Assign offsets within each group
-    const result = [];
-    groups.forEach(group => {
-        if (group.length === 1) {
-            result.push({ ...group[0], offset: 0 });
-        } else {
-            // Offset paths in group symmetrically around center
-            const totalWidth = (group.length - 1) * offsetAmount;
-            group.forEach((pathData, i) => {
-                const offset = (i * offsetAmount) - (totalWidth / 2);
-                result.push({ ...pathData, offset });
-            });
-        }
-    });
-    
-    return result;
-}
-
-// Check if two paths share similar positions
-function pathsSharePositions(positions1, positions2, threshold = 50) {
-    if (!positions1 || !positions2) return false;
-    
-    let sharedCount = 0;
-    for (const pos1 of positions1) {
-        for (const pos2 of positions2) {
-            const dist = Math.sqrt(
-                Math.pow(pos1.cx - pos2.cx, 2) + 
-                Math.pow(pos1.cy - pos2.cy, 2)
-            );
-            if (dist < threshold) {
-                sharedCount++;
-                break;
-            }
-        }
-    }
-    
-    // Consider paths as overlapping if they share at least 30% of points
-    return sharedCount >= Math.min(positions1.length, positions2.length) * 0.3;
+// Canonical key for a directed segment; snaps to tolerance grid to absorb float noise
+function segmentKey(p1, p2, tolerance) {
+    const r = v => Math.round(v / tolerance) * tolerance;
+    return `${r(p1.cx)},${r(p1.cy)}|${r(p2.cx)},${r(p2.cy)}`;
 }
 
 // Update character paths for a given scene
@@ -322,9 +273,23 @@ function updateCharacterPathsForScene(sceneIndex) {
     drawCharacterPaths();
 }
 
+// Rebuild all character paths from scene 0 up to sceneIndex from the loaded marker data
+function buildPathsUpToScene(sceneIndex) {
+    _characterPaths = {};
+    const sceneOptions = document.querySelectorAll('#sceneSelect option');
+    for (let i = 0; i <= sceneIndex; i++) {
+        const sceneName = sceneOptions[i] ? sceneOptions[i].textContent.trim() : null;
+        if (!sceneName) continue;
+        const positions = getFellowshipStartPositionsForScene(sceneName);
+        positions.forEach(pos => addCharacterPosition(pos.character, pos.cx, pos.cy, i));
+    }
+    drawCharacterPaths();
+}
+
 // Export for manual use and animation
 window.placeMarkersOnMap = placeMarkersOnMap;
 window.showFellowshipStartPositionsForCurrentScene = showFellowshipStartPositionsForCurrentScene;
 window.showCharacterMarkersAtPositions = showCharacterMarkersAtPositions;
 window.clearCharacterPaths = clearCharacterPaths;
 window.updateCharacterPathsForScene = updateCharacterPathsForScene;
+window.buildPathsUpToScene = buildPathsUpToScene;
