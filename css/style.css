@@ -683,7 +683,8 @@ body:has(#overview-toggle:checked) .overview-icon {
     letter-spacing: 0.03em;
 }
 
-.character-description {
+.character-description,
+.scene-description {
     font-family: 'Cinzel', serif;
     font-size: 0.75rem;
     letter-spacing: 0.02em;
@@ -1264,6 +1265,10 @@ body:has(#overview-toggle:checked) .overview-icon {
     gap: 0;
 }
 
+.info-panel.expanded .scene-thumb {
+    display: none;
+}
+
 .info-panel.expanded .scene-stats {
     flex-direction: row;
     gap: var(--gap-xl);
@@ -1295,8 +1300,6 @@ body:has(#overview-toggle:checked) .overview-icon {
     width: 100%;
     display: block;
     border-radius: var(--panel-radius);
-    object-fit: cover;
-    max-height: 7rem;
     opacity: 0.82;
     margin-top: var(--gap-xs);
 }
