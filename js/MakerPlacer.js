@@ -88,7 +88,7 @@ function showCharacterMarkersAtPositions(positions, svgSelector = '#svgMap') {
         .attr('width', 32)
         .attr('height', 32)
         // Use lowercase for character PNG file name
-        .attr("xlink:href", d => `data/images/${d.character.toLowerCase()}.png`)
+        .attr("xlink:href", d => `data/images/characters/${d.character.toLowerCase()}.png`)
         .attr('data-character', d => d.character)
         .attr('filter', 'url(#marker-drop-shadow)')
         .append('title')

@@ -102,7 +102,7 @@ class InfoPanel {
      */
     showCharacter(name) {
         const stats  = this.characterStats[name];
-        const imgSrc = `data/images/${name.toLowerCase()}.png`;
+        const imgSrc = `data/images/characters/${name.toLowerCase()}.png`;
 
         // Display Wiki links
         const wikiUrl = CHARACTER_WIKI_URLS[name];
