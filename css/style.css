@@ -1295,8 +1295,6 @@ body:has(#overview-toggle:checked) .overview-icon {
     width: 100%;
     display: block;
     border-radius: var(--panel-radius);
-    object-fit: cover;
-    max-height: 7rem;
     opacity: 0.82;
     margin-top: var(--gap-xs);
 }

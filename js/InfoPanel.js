@@ -332,6 +332,7 @@ class InfoPanel {
             <div class="scene-info">
                 <h3 class="scene-name">${sceneName}</h3>
                 <p class="scene-film">${filmName}</p>
+                <img class="scene-thumb" src="data/images/scenes/${index}.png" alt="${sceneName}">
                 <div class="scene-stats">
                     <div class="char-stat">
                         <span class="stat-label">Lines</span>
