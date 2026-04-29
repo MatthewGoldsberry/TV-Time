@@ -47,6 +47,7 @@ class InfoPanel {
         this.corpusWordFreq  = _config.corpusWordFreq;
         this.corpusNgramFreq = _config.corpusNgramFreq;
         this.SCENE_INDEX = _config.SCENE_INDEX;
+        this.sceneSummaries = _config.SCENE_SUMMARIES;
         this.isExpanded = false;
         this.initVis();
     }
@@ -327,6 +328,13 @@ class InfoPanel {
 
         const fmt = v => (v != null && v !== 0) ? v.toLocaleString() : '—';
 
+        const summary = this.sceneSummaries?.[String(index)]?.summary;
+        const summaryHTML = summary
+            ? `<div class="extended-section description-section">
+                   <p class="scene-description">${summary}</p>
+               </div>`
+            : '';
+
         this.titleEl.textContent = 'Scene Info';
         this.contentEl.innerHTML = `
             <div class="scene-info">
@@ -348,6 +356,7 @@ class InfoPanel {
                     </div>
                 </div>
                 <div class="scene-extended">
+                    ${summaryHTML}
                     <div class="extended-section is-open">
                         <div class="section-header">
                             <span class="section-title">Speaking Characters</span>

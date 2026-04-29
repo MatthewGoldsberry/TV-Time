@@ -683,7 +683,8 @@ body:has(#overview-toggle:checked) .overview-icon {
     letter-spacing: 0.03em;
 }
 
-.character-description {
+.character-description,
+.scene-description {
     font-family: 'Cinzel', serif;
     font-size: 0.75rem;
     letter-spacing: 0.02em;
