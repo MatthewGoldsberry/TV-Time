@@ -114,18 +114,20 @@ class CharacterChord {
             .style('pointer-events', 'none');
 
         // Ring Inscription
+        const inscriptCircumference = 2 * Math.PI * inscriptR;
         vis.svg.append('text')
-            .style('fill', 'rgba(255, 240, 200, 0.95)') 
+            .style('fill', 'rgba(255, 240, 200, 0.95)')
             .style('font-family', "'TengwarAnnatar', serif")
-            .style('font-size', '11.5px') 
+            .style('font-size', Math.max(8, inscriptR * 0.085) + 'px')
             .style('font-weight', '600')
-            .style('letter-spacing', '0.05em')
             .style('pointer-events', 'none')
             .attr('filter', 'url(#inscription-shadow)')
-            .attr('dy', '8')
+            .attr('dy', Math.max(4, inscriptR * 0.075))
             .append('textPath')
             .attr('href', '#chord-ring-path')
             .attr('startOffset', '0%')
+            .attr('textLength', inscriptCircumference)
+            .attr('lengthAdjust', 'spacingAndGlyphs')
             .text('Ash nazg durbatuluk · ash nazg gimbatul · ash nazg thrakatuluk · agh burzum-ishi krimpatul · ');
 
         // Layer ribbons behind arcs, labels on top of everything
